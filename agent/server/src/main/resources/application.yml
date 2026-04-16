@@ -1,0 +1,89 @@
+server:
+  port: 8080
+
+spring:
+  profiles:
+    active: dev
+  main:
+    allow-circular-references: true
+  application:
+    name: ${clover.application.name}
+  datasource:
+    driver-class-name: ${clover.datasource.druid.driver-class-name}
+    url: jdbc:mysql://${clover.datasource.druid.host}:${clover.datasource.druid.port}/${clover.application.name}?serverTimezone=Asia/Shanghai&useUnicode=true&characterEncoding=utf-8&zeroDateTimeBehavior=convertToNull&useSSL=false&allowPublicKeyRetrieval=true
+    username: ${clover.datasource.druid.username}
+    password: ${clover.datasource.druid.password}
+    type: com.alibaba.druid.pool.DruidDataSource
+  data:
+    redis:
+      host: ${clover.redis.host}
+      port: ${clover.redis.port}
+      password: ${clover.redis.password}
+      database: ${clover.redis.database}
+  servlet:
+    multipart:
+      max-file-size: ${clover.servlet.multipart.max-file-size}
+      max-request-size: ${clover.servlet.multipart.max-request-size}
+
+# Knife4j/OpenAPI 配置
+springdoc:
+  swagger-ui:
+    path: /swagger-ui.html
+  api-docs:
+    path: /v3/api-docs
+knife4j:
+  enable: true
+  setting:
+    language: zh_cn
+
+mybatis:
+  mapper-locations: classpath:mapper/*.xml
+  configuration:
+    map-underscore-to-camel-case: true
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+
+logging:
+  level:
+    com:
+      clover:
+        mapper: debug
+        service: info
+        controller: info
+clover:
+  jwt:
+    # 设置jwt签名加密时使用的秘钥（至少32个字符，保证256位以上）
+    user-secret-key: ${JWT_SECRET_KEY:agent-SecureKey-For-JWT-Signing-2026}
+    # 设置jwt过期时间
+    user-ttl: 7200000
+    # 设置前端传递过来的令牌名称
+    user-token-name: token
+    # ... existing code ...
+  alioss:
+    endpoint: ${clover.alioss.endpoint}
+    access-key-id: ${clover.alioss.access-key-id}
+    access-key-secret: ${clover.alioss.access-key-secret}
+    bucket-name: ${clover.alioss.bucket-name}
+
+pagehelper:
+  helper-dialect: mysql
+  reasonable: true
+  support-methods-arguments: true
+  params: count=countSql
+
+# AI智能体配置
+agent:
+  api:
+    # 通义千问 API密钥（从阿里云 DashScope 获取）
+    key: ${AI_API_KEY:your-dashscope-api-key}
+    # 通义千问 API地址
+    url: ${AI_API_URL:https://dashscope.aliyuncs.com/api/v1/services/aigc/text-generation/generation}
+    # 模型名称：qwen-turbo / qwen-plus / qwen-max / qwen-long
+    model: ${AI_API_MODEL:qwen-turbo}
+
+# 天气API配置
+weather:
+  api:
+    # 天气API密钥（可选，不配置则使用模拟数据）
+    key: ${WEATHER_API_KEY:}
+    # 天气API地址
+    url: ${WEATHER_API_URL:https://api.openweathermap.org/data/2.5/weather}

@@ -1,0 +1,788 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>任务管理中心 - AI智能助理</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Microsoft YaHei', Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .header {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            margin-bottom: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        }
+
+        .header h1 {
+            color: #2d3748;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            color: #718096;
+        }
+
+        .nav-links {
+            margin-top: 15px;
+        }
+
+        .nav-links a {
+            color: #667eea;
+            text-decoration: none;
+            margin-right: 20px;
+        }
+
+        .nav-links a:hover {
+            text-decoration: underline;
+        }
+
+        .main-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        /* 聊天面板 */
+        .chat-panel {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            height: 700px;
+        }
+
+        .panel-header {
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .panel-header h2 {
+            font-size: 18px;
+        }
+
+        .chat-messages {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px;
+            background: #f7fafc;
+        }
+
+        .message {
+            margin-bottom: 15px;
+            padding: 12px 18px;
+            border-radius: 12px;
+            line-height: 1.6;
+        }
+
+        .message-user {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            margin-left: 20%;
+        }
+
+        .message-bot {
+            background: white;
+            border: 1px solid #e2e8f0;
+            margin-right: 20%;
+        }
+
+        .chat-input-area {
+            padding: 20px;
+            border-top: 1px solid #e2e8f0;
+        }
+
+        .input-group {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+
+        .input-group input {
+            flex: 1;
+            padding: 12px 15px;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: 14px;
+        }
+
+        .input-group input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .btn {
+            padding: 12px 20px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.3s;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .quick-actions {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .quick-btn {
+            padding: 6px 12px;
+            background: #edf2f7;
+            border: 1px solid #e2e8f0;
+            border-radius: 15px;
+            cursor: pointer;
+            font-size: 12px;
+            transition: all 0.3s;
+        }
+
+        .quick-btn:hover {
+            background: #667eea;
+            color: white;
+        }
+
+        /* 任务列表面板 */
+        .task-panel {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            overflow: hidden;
+            height: 700px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .task-list {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px;
+        }
+
+        .task-item {
+            background: #f7fafc;
+            border: 2px solid #e2e8f0;
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 15px;
+            transition: all 0.3s;
+        }
+
+        .task-item:hover {
+            border-color: #667eea;
+            transform: translateX(5px);
+        }
+
+        .task-item.completed {
+            opacity: 0.6;
+            background: #c6f6d5;
+            border-color: #9ae6b4;
+        }
+
+        .task-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .task-title {
+            font-weight: bold;
+            color: #2d3748;
+            font-size: 16px;
+        }
+
+        .task-status {
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+
+        .status-pending {
+            background: #fefcbf;
+            color: #975a16;
+        }
+
+        .status-completed {
+            background: #c6f6d5;
+            color: #22543d;
+        }
+
+        .task-meta {
+            display: flex;
+            gap: 15px;
+            font-size: 12px;
+            color: #718096;
+            margin-top: 10px;
+        }
+
+        .task-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .btn-small {
+            padding: 6px 12px;
+            font-size: 12px;
+        }
+
+        .btn-success {
+            background: #48bb78;
+            color: white;
+        }
+
+        .btn-danger {
+            background: #f56565;
+            color: white;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #a0aec0;
+        }
+
+        .empty-state-icon {
+            font-size: 64px;
+            margin-bottom: 20px;
+        }
+
+        /* 统计卡片 */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+            padding: 20px;
+            background: #f7fafc;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 15px;
+            border-radius: 10px;
+            text-align: center;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .stat-value {
+            font-size: 28px;
+            font-weight: bold;
+            color: #667eea;
+            margin-bottom: 5px;
+        }
+
+        .stat-label {
+            font-size: 12px;
+            color: #718096;
+        }
+
+        /* 加载动画 */
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #718096;
+        }
+
+        .spinner {
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #667eea;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 15px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #888;
+            border-radius: 4px;
+        }
+
+        /* 手机端适配 */
+        @media screen and (max-width: 1024px) {
+            .main-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .chat-panel,
+            .task-panel {
+                height: auto;
+                min-height: 500px;
+            }
+        }
+
+        @media screen and (max-width: 768px) {
+            body {
+                padding: 10px;
+            }
+
+            .header {
+                padding: 20px;
+                margin-bottom: 15px;
+                border-radius: 12px;
+            }
+
+            .header h1 {
+                font-size: 22px;
+            }
+
+            .header p {
+                font-size: 13px;
+            }
+
+            .nav-links {
+                display: flex;
+                flex-wrap: wrap;
+                gap: 10px;
+            }
+
+            .nav-links a {
+                margin-right: 0;
+                font-size: 13px;
+                padding: 5px 10px;
+                background: #f7fafc;
+                border-radius: 6px;
+            }
+
+            .chat-panel,
+            .task-panel {
+                border-radius: 12px;
+                height: auto;
+                min-height: 600px;
+            }
+
+            .panel-header {
+                padding: 15px;
+            }
+
+            .panel-header h2 {
+                font-size: 16px;
+            }
+
+            .stats-grid {
+                grid-template-columns: repeat(3, 1fr);
+                gap: 10px;
+                padding: 15px;
+            }
+
+            .stat-card {
+                padding: 10px;
+            }
+
+            .stat-value {
+                font-size: 22px;
+            }
+
+            .stat-label {
+                font-size: 11px;
+            }
+
+            .task-list {
+                padding: 15px;
+            }
+
+            .task-item {
+                padding: 12px;
+            }
+
+            .task-title {
+                font-size: 14px;
+            }
+
+            .task-meta {
+                flex-direction: column;
+                gap: 5px;
+            }
+
+            .task-actions {
+                flex-wrap: wrap;
+            }
+
+            .chat-messages {
+                padding: 15px;
+            }
+
+            .message {
+                padding: 10px 14px;
+                font-size: 13px;
+            }
+
+            .message-user {
+                margin-left: 10%;
+            }
+
+            .message-bot {
+                margin-right: 10%;
+            }
+
+            .chat-input-area {
+                padding: 15px;
+            }
+
+            .input-group {
+                flex-direction: column;
+            }
+
+            .btn {
+                width: 100%;
+                padding: 10px 18px;
+            }
+
+            .quick-actions {
+                justify-content: center;
+            }
+
+            .quick-btn {
+                font-size: 11px;
+                padding: 5px 10px;
+            }
+        }
+
+        @media screen and (max-width: 480px) {
+            .header h1 {
+                font-size: 20px;
+            }
+
+            .nav-links a {
+                font-size: 12px;
+                padding: 4px 8px;
+            }
+
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .message {
+                font-size: 12px;
+            }
+
+            .quick-btn {
+                font-size: 10px;
+                padding: 4px 8px;
+            }
+
+            .task-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 8px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- 头部 -->
+        <div class="header">
+            <h1>📋 任务管理中心</h1>
+            <p>通过自然语言管理你的任务和待办事项</p>
+            <div class="nav-links">
+                <a href="index.html">💬 智能对话</a>
+                <a href="weather-planner.html">🌤️ 天气出行</a>
+                <a href="file-manager.html">📁 文件管理</a>
+            </div>
+        </div>
+
+        <div class="main-grid">
+            <!-- 左侧：AI对话 -->
+            <div class="chat-panel">
+                <div class="panel-header">
+                    <h2>🤖 AI任务助手</h2>
+                </div>
+                <div class="chat-messages" id="chatMessages">
+                    <div class="message message-bot">
+                        👋 你好！我可以帮助你管理任务。试试对我说：
+                        <br><br>
+                        • "创建任务：完成项目报告"
+                        <br>
+                        • "查看我的任务"
+                        <br>
+                        • "完成任务 1"
+                        <br>
+                        • "删除任务 2"
+                    </div>
+                </div>
+                <div class="chat-input-area">
+                    <div class="input-group">
+                        <input type="text" id="messageInput" placeholder="输入指令..." 
+                               onkeypress="if(event.key==='Enter') sendMessage()">
+                        <button class="btn btn-primary" onclick="sendMessage()">发送</button>
+                    </div>
+                    <div class="quick-actions">
+                        <button class="quick-btn" onclick="sendQuick('创建任务：学习JavaScript')">➕ 创建任务</button>
+                        <button class="quick-btn" onclick="sendQuick('查看我的任务')">📋 查看任务</button>
+                        <button class="quick-btn" onclick="refreshTasks()">🔄 刷新列表</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 右侧：任务列表 -->
+            <div class="task-panel">
+                <div class="panel-header">
+                    <h2>📝 我的任务</h2>
+                </div>
+                
+                <!-- 统计信息 -->
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-value" id="totalCount">0</div>
+                        <div class="stat-label">总任务</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="pendingCount">0</div>
+                        <div class="stat-label">待完成</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="completedCount">0</div>
+                        <div class="stat-label">已完成</div>
+                    </div>
+                </div>
+
+                <!-- 任务列表 -->
+                <div class="task-list" id="taskList">
+                    <div class="loading">
+                        <div class="spinner"></div>
+                        <div>加载中...</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let userId = localStorage.getItem('agentUserId');
+        if (!userId) {
+            userId = 'user_' + Math.random().toString(36).substring(2, 10);
+            localStorage.setItem('agentUserId', userId);
+        }
+
+        // 模拟任务数据（实际应该从后端获取）
+        let tasks = [];
+
+        // 发送消息
+        async function sendMessage() {
+            const input = document.getElementById('messageInput');
+            const message = input.value.trim();
+            if (!message) return;
+
+            addMessage(message, true);
+            input.value = '';
+
+            try {
+                const response = await fetch('/agent/chat', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ userId, message })
+                });
+
+                const result = await response.json();
+                
+                if (result.code === 1) {
+                    const formattedResponse = result.data.replace(/\n/g, '<br>');
+                    addMessage(formattedResponse, false);
+                    
+                    // 如果消息涉及任务操作，刷新任务列表
+                    if (message.includes('任务') || message.includes('待办')) {
+                        setTimeout(refreshTasks, 500);
+                    }
+                } else {
+                    addMessage('❌ 错误：' + result.msg, false);
+                }
+            } catch (error) {
+                addMessage('❌ 网络错误：' + error.message, false);
+            }
+        }
+
+        function sendQuick(message) {
+            document.getElementById('messageInput').value = message;
+            sendMessage();
+        }
+
+        function addMessage(content, isUser) {
+            const chatMessages = document.getElementById('chatMessages');
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${isUser ? 'message-user' : 'message-bot'}`;
+            messageDiv.innerHTML = content;
+            chatMessages.appendChild(messageDiv);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+
+        // 刷新任务列表
+        async function refreshTasks() {
+            const taskList = document.getElementById('taskList');
+            taskList.innerHTML = `
+                <div class="loading">
+                    <div class="spinner"></div>
+                    <div>加载中...</div>
+                </div>
+            `;
+
+            // 通过AI查询任务
+            try {
+                const response = await fetch('/agent/chat', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ userId, message: '查看我的任务' })
+                });
+
+                const result = await response.json();
+                
+                if (result.code === 1) {
+                    // 解析任务数据（这里简化处理，实际应该调用专门的API）
+                    parseAndDisplayTasks(result.data);
+                }
+            } catch (error) {
+                taskList.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-state-icon">⚠️</div>
+                        <div>加载失败：${error.message}</div>
+                    </div>
+                `;
+            }
+        }
+
+        // 解析并显示任务
+        function parseAndDisplayTasks(responseText) {
+            const taskList = document.getElementById('taskList');
+            
+            // 简单解析（实际应该使用结构化数据）
+            if (responseText.includes('没有任务')) {
+                taskList.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-state-icon">📭</div>
+                        <div>暂无任务</div>
+                        <div style="margin-top: 10px; font-size: 14px;">
+                            在左侧对话框中创建你的第一个任务吧！
+                        </div>
+                    </div>
+                `;
+                updateStats(0, 0, 0);
+                return;
+            }
+
+            // 尝试提取任务信息
+            const lines = responseText.split('\n');
+            let taskItems = [];
+            
+            lines.forEach(line => {
+                if (line.includes('[') && line.includes(']')) {
+                    const match = line.match(/(\[.*?\])\s*(.*)/);
+                    if (match) {
+                        const status = match[1].includes('✅') ? 'completed' : 'pending';
+                        const description = match[2].trim();
+                        taskItems.push({ status, description });
+                    }
+                }
+            });
+
+            if (taskItems.length === 0) {
+                taskList.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-state-icon">📭</div>
+                        <div>暂无任务</div>
+                    </div>
+                `;
+                updateStats(0, 0, 0);
+                return;
+            }
+
+            // 渲染任务列表
+            let html = '';
+            let completed = 0;
+            
+            taskItems.forEach((task, index) => {
+                if (task.status === 'completed') completed++;
+                
+                html += `
+                    <div class="task-item ${task.status}">
+                        <div class="task-header">
+                            <div class="task-title">${task.description}</div>
+                            <span class="task-status ${task.status === 'completed' ? 'status-completed' : 'status-pending'}">
+                                ${task.status === 'completed' ? '✅ 已完成' : '⏳ 待完成'}
+                            </span>
+                        </div>
+                        <div class="task-actions">
+                            ${task.status !== 'completed' ? 
+                                `<button class="btn btn-success btn-small" onclick="completeTask(${index})">✓ 完成</button>` : ''}
+                            <button class="btn btn-danger btn-small" onclick="deleteTask(${index})">🗑 删除</button>
+                        </div>
+                    </div>
+                `;
+            });
+
+            taskList.innerHTML = html;
+            updateStats(taskItems.length, taskItems.length - completed, completed);
+        }
+
+        function updateStats(total, pending, completed) {
+            document.getElementById('totalCount').textContent = total;
+            document.getElementById('pendingCount').textContent = pending;
+            document.getElementById('completedCount').textContent = completed;
+        }
+
+        async function completeTask(index) {
+            const message = `完成任务 ${index + 1}`;
+            document.getElementById('messageInput').value = message;
+            sendMessage();
+        }
+
+        async function deleteTask(index) {
+            if (!confirm('确定要删除这个任务吗？')) return;
+            
+            const message = `删除任务 ${index + 1}`;
+            document.getElementById('messageInput').value = message;
+            sendMessage();
+        }
+
+        // 页面加载时刷新任务
+        window.onload = () => {
+            refreshTasks();
+            document.getElementById('messageInput').focus();
+        };
+    </script>
+</body>
+</html>

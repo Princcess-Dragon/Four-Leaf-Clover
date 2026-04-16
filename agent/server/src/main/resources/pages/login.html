@@ -1,0 +1,566 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>用户登录 - AI办公助理</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .login-container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+            max-width: 400px;
+            width: 100%;
+            animation: slideUp 0.5s ease;
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .login-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 40px 30px;
+            text-align: center;
+        }
+
+        .login-header h1 {
+            font-size: 28px;
+            margin-bottom: 10px;
+        }
+
+        .login-header p {
+            font-size: 14px;
+            opacity: 0.9;
+        }
+
+        .login-body {
+            padding: 40px 30px;
+        }
+
+        .form-group {
+            margin-bottom: 25px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #333;
+            font-weight: 500;
+            font-size: 14px;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #e1e1e1;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: all 0.3s;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .btn {
+            width: 100%;
+            padding: 14px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-bottom: 15px;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+        }
+
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .switch-link {
+            text-align: center;
+            margin-top: 20px;
+            color: #666;
+            font-size: 14px;
+        }
+
+        .switch-link a {
+            color: #667eea;
+            text-decoration: none;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .switch-link a:hover {
+            text-decoration: underline;
+        }
+
+        .message {
+            padding: 12px 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            font-size: 14px;
+            display: none;
+        }
+
+        .message.success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .message.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .message.show {
+            display: block;
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+            to {
+                opacity: 1;
+            }
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .captcha-group {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .captcha-group input {
+            flex: 1;
+        }
+
+        .captcha-image {
+            width: 120px;
+            height: 40px;
+            border: 2px solid #e1e1e1;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+            background: #f5f5f5;
+        }
+
+        .captcha-image:hover {
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        /* 手机端适配 */
+        @media screen and (max-width: 768px) {
+            body {
+                padding: 10px;
+            }
+
+            .login-container {
+                max-width: 100%;
+                border-radius: 15px;
+            }
+
+            .login-header {
+                padding: 30px 20px;
+            }
+
+            .login-header h1 {
+                font-size: 24px;
+            }
+
+            .login-header p {
+                font-size: 13px;
+            }
+
+            .login-body {
+                padding: 30px 20px;
+            }
+
+            .form-group {
+                margin-bottom: 20px;
+            }
+
+            .form-group label {
+                font-size: 13px;
+            }
+
+            .form-group input {
+                padding: 10px 12px;
+                font-size: 14px;
+            }
+
+            .btn {
+                padding: 12px;
+                font-size: 15px;
+            }
+
+            .captcha-group {
+                flex-direction: row;
+                gap: 8px;
+            }
+
+            .captcha-image {
+                width: 100px;
+                height: 40px;
+            }
+
+            .switch-link {
+                font-size: 13px;
+            }
+        }
+
+        /* 小屏幕手机适配 */
+        @media screen and (max-width: 480px) {
+            .login-header h1 {
+                font-size: 22px;
+            }
+
+            .captcha-group {
+                flex-wrap: wrap;
+            }
+
+            .captcha-group input {
+                min-width: 100%;
+                order: 1;
+            }
+
+            .captcha-image {
+                width: 100%;
+                height: 50px;
+                order: 2;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="login-container">
+        <!-- 登录表单 -->
+        <div id="loginForm">
+            <div class="login-header">
+                <h1>欢迎回来</h1>
+                <p>登录您的AI办公助理账户</p>
+            </div>
+            <div class="login-body">
+                <div id="loginMessage" class="message"></div>
+                <form onsubmit="handleLogin(event)">
+                    <div class="form-group">
+                        <label for="loginUsername">用户名</label>
+                        <input type="text" id="loginUsername" name="username" required placeholder="请输入用户名">
+                    </div>
+                    <div class="form-group">
+                        <label for="loginPassword">密码</label>
+                        <input type="password" id="loginPassword" name="password" required placeholder="请输入密码">
+                    </div>
+                    <div class="form-group">
+                        <label for="loginCaptcha">验证码</label>
+                        <div class="captcha-group">
+                            <input type="text" id="loginCaptcha" name="captchaCode" required placeholder="请输入验证码" maxlength="4">
+                            <img id="loginCaptchaImage" class="captcha-image" src="" alt="点击刷新验证码" title="点击刷新验证码" onclick="refreshLoginCaptcha()">
+                        </div>
+                        <input type="hidden" id="loginCaptchaKey">
+                    </div>
+                    <button type="submit" class="btn" id="loginBtn">登录</button>
+                </form>
+                <div class="switch-link">
+                    还没有账户？<a onclick="showRegister()">立即注册</a>
+                </div>
+            </div>
+        </div>
+
+        <!-- 注册表单 -->
+        <div id="registerForm" class="hidden">
+            <div class="login-header">
+                <h1>创建账户</h1>
+                <p>注册AI办公助理账户</p>
+            </div>
+            <div class="login-body">
+                <div id="registerMessage" class="message"></div>
+                <form onsubmit="handleRegister(event)">
+                    <div class="form-group">
+                        <label for="registerUsername">用户名</label>
+                        <input type="text" id="registerUsername" name="username" required placeholder="请输入用户名">
+                    </div>
+                    <div class="form-group">
+                        <label for="registerPassword">密码</label>
+                        <input type="password" id="registerPassword" name="password" required placeholder="请输入密码">
+                    </div>
+                    <div class="form-group">
+                        <label for="registerEmail">邮箱</label>
+                        <input type="email" id="registerEmail" name="email" required placeholder="请输入邮箱">
+                    </div>
+                    <div class="form-group">
+                        <label for="registerCaptcha">验证码</label>
+                        <div class="captcha-group">
+                            <input type="text" id="registerCaptcha" name="captchaCode" required placeholder="请输入验证码" maxlength="4">
+                            <img id="registerCaptchaImage" class="captcha-image" src="" alt="点击刷新验证码" title="点击刷新验证码" onclick="refreshRegisterCaptcha()">
+                        </div>
+                        <input type="hidden" id="registerCaptchaKey">
+                    </div>
+                    <button type="submit" class="btn" id="registerBtn">注册</button>
+                </form>
+                <div class="switch-link">
+                    已有账户？<a onclick="showLogin()">立即登录</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 使用相对路径，自动适配当前域名
+        const API_BASE_URL = '/api';
+
+        // 显示登录表单
+        function showLogin() {
+            document.getElementById('loginForm').classList.remove('hidden');
+            document.getElementById('registerForm').classList.add('hidden');
+            clearMessages();
+        }
+
+        // 显示注册表单
+        function showRegister() {
+            document.getElementById('registerForm').classList.remove('hidden');
+            document.getElementById('loginForm').classList.add('hidden');
+            clearMessages();
+        }
+
+        // 清除消息
+        function clearMessages() {
+            document.getElementById('loginMessage').className = 'message';
+            document.getElementById('loginMessage').textContent = '';
+            document.getElementById('registerMessage').className = 'message';
+            document.getElementById('registerMessage').textContent = '';
+        }
+
+        // 显示消息
+        function showMessage(elementId, type, text) {
+            const element = document.getElementById(elementId);
+            element.className = `message ${type} show`;
+            element.textContent = text;
+            setTimeout(() => {
+                element.classList.remove('show');
+            }, 5000);
+        }
+
+        // 刷新登录验证码
+        async function refreshLoginCaptcha() {
+            try {
+                const response = await fetch(`${API_BASE_URL}/captcha/image`);
+                const result = await response.json();
+                
+                if (result.code === 1) {
+                    document.getElementById('loginCaptchaImage').src = result.data.captchaImage;
+                    document.getElementById('loginCaptchaKey').value = result.data.captchaKey;
+                    // 清空验证码输入框
+                    document.getElementById('loginCaptcha').value = '';
+                }
+            } catch (error) {
+                console.error('获取验证码失败:', error);
+                showMessage('loginMessage', 'error', '获取验证码失败，请重试');
+            }
+        }
+
+        // 刷新注册验证码
+        async function refreshRegisterCaptcha() {
+            try {
+                const response = await fetch(`${API_BASE_URL}/captcha/image`);
+                const result = await response.json();
+                
+                if (result.code === 1) {
+                    document.getElementById('registerCaptchaImage').src = result.data.captchaImage;
+                    document.getElementById('registerCaptchaKey').value = result.data.captchaKey;
+                    // 清空验证码输入框
+                    document.getElementById('registerCaptcha').value = '';
+                }
+            } catch (error) {
+                console.error('获取验证码失败:', error);
+                showMessage('registerMessage', 'error', '获取验证码失败，请重试');
+            }
+        }
+
+        // 处理登录
+        async function handleLogin(event) {
+            event.preventDefault();
+            
+            const username = document.getElementById('loginUsername').value;
+            const password = document.getElementById('loginPassword').value;
+            const captchaCode = document.getElementById('loginCaptcha').value;
+            const captchaKey = document.getElementById('loginCaptchaKey').value;
+            const loginBtn = document.getElementById('loginBtn');
+
+            if (!captchaKey) {
+                showMessage('loginMessage', 'error', '请先获取验证码');
+                return;
+            }
+
+            if (!captchaCode) {
+                showMessage('loginMessage', 'error', '请输入验证码');
+                return;
+            }
+
+            loginBtn.disabled = true;
+            loginBtn.textContent = '登录中...';
+
+            try {
+                const response = await fetch(`${API_BASE_URL}/user/login`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ username, password, captchaKey, captchaCode })
+                });
+
+                const result = await response.json();
+
+                if (result.code === 1) {
+                    showMessage('loginMessage', 'success', '登录成功！正在跳转...');
+                    
+                    // 保存token到localStorage
+                    localStorage.setItem('token', result.data.token);
+                    localStorage.setItem('userId', result.data.userId);
+                    localStorage.setItem('username', result.data.username);
+
+                    // 跳转到主页
+                    setTimeout(() => {
+                        window.location.href = '/index';
+                    }, 1000);
+                } else {
+                    showMessage('loginMessage', 'error', result.msg || '登录失败');
+                    // 刷新验证码
+                    refreshLoginCaptcha();
+                }
+            } catch (error) {
+                showMessage('loginMessage', 'error', '网络错误，请稍后重试');
+                console.error('登录错误:', error);
+            } finally {
+                loginBtn.disabled = false;
+                loginBtn.textContent = '登录';
+            }
+        }
+
+        // 处理注册
+        async function handleRegister(event) {
+            event.preventDefault();
+            
+            const username = document.getElementById('registerUsername').value;
+            const password = document.getElementById('registerPassword').value;
+            const email = document.getElementById('registerEmail').value;
+            const captchaCode = document.getElementById('registerCaptcha').value;
+            const captchaKey = document.getElementById('registerCaptchaKey').value;
+            const registerBtn = document.getElementById('registerBtn');
+
+            if (!captchaKey) {
+                showMessage('registerMessage', 'error', '请先获取验证码');
+                return;
+            }
+
+            if (!captchaCode) {
+                showMessage('registerMessage', 'error', '请输入验证码');
+                return;
+            }
+
+            registerBtn.disabled = true;
+            registerBtn.textContent = '注册中...';
+
+            try {
+                const response = await fetch(`${API_BASE_URL}/user/register`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ username, password, email, captchaKey, captchaCode })
+                });
+
+                const result = await response.json();
+
+                if (result.code === 1) {
+                    showMessage('registerMessage', 'success', '注册成功！正在跳转...');
+                    
+                    // 保存token到localStorage
+                    localStorage.setItem('token', result.data.token);
+                    localStorage.setItem('userId', result.data.userId);
+                    localStorage.setItem('username', result.data.username);
+
+                    // 跳转到主页
+                    setTimeout(() => {
+                        window.location.href = '/index';
+                    }, 1000);
+                } else {
+                    showMessage('registerMessage', 'error', result.msg || '注册失败');
+                    // 刷新验证码
+                    refreshRegisterCaptcha();
+                }
+            } catch (error) {
+                showMessage('registerMessage', 'error', '网络错误，请稍后重试');
+                console.error('注册错误:', error);
+            } finally {
+                registerBtn.disabled = false;
+                registerBtn.textContent = '注册';
+            }
+        }
+
+        // 页面加载时检查是否已登录
+        window.addEventListener('DOMContentLoaded', () => {
+            const token = localStorage.getItem('token');
+            if (token) {
+                // 已登录，直接跳转到主页
+                window.location.href = '/index';
+            } else {
+                // 未登录，初始化验证码
+                refreshLoginCaptcha();
+                refreshRegisterCaptcha();
+            }
+        });
+    </script>
+</body>
+</html>

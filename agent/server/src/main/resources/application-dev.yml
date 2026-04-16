@@ -1,0 +1,35 @@
+clover:
+  application:
+    name: agent
+  datasource:
+    druid:
+      driver-class-name: com.mysql.cj.jdbc.Driver
+      host: localhost
+      port: 3306
+      database: agent
+      username: 待填
+      password: 待填
+  alioss:
+    endpoint: oss-cn-hangzhou.aliyuncs.com
+    access-key-id: 待填
+    access-key-secret: 待填
+    bucket-name: test-cloud-storage
+  redis:
+    host: localhost
+    port: 6379
+    password: 待填
+    database: 10
+  servlet:
+    multipart:
+      max-file-size: 2048MB
+      max-request-size: 2048MB
+
+# 通义千问 AI 配置
+agent:
+  api:
+    # 替换为你的通义千问 API Key（从 https://dashscope.console.aliyun.com/ 获取）
+    key: 待填
+    # 通义千问 API 地址
+    url: https://dashscope.aliyuncs.com/api/v1/services/aigc/text-generation/generation
+    # 模型选择: qwen-turbo / qwen-plus / qwen-max
+    model: qwen-turbo

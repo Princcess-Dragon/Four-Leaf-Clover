@@ -1,0 +1,606 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI智能办公助理</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Microsoft YaHei', Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .header {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            margin-bottom: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        }
+
+        .header h1 {
+            color: #2d3748;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            color: #718096;
+        }
+
+        .nav-links {
+            margin-top: 15px;
+        }
+
+        .nav-links a {
+            color: #667eea;
+            text-decoration: none;
+            margin-right: 20px;
+        }
+
+        .nav-links a:hover {
+            text-decoration: underline;
+        }
+
+        .main-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        /* 聊天面板 */
+        .chat-panel {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            height: 700px;
+        }
+
+        .panel-header {
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .panel-header h2 {
+            font-size: 18px;
+        }
+
+        .chat-messages {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px;
+            background: #f7fafc;
+        }
+
+        .message {
+            margin-bottom: 15px;
+            padding: 12px 18px;
+            border-radius: 12px;
+            line-height: 1.6;
+            animation: fadeIn 0.3s ease-in;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .message-user {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            margin-left: 20%;
+        }
+
+        .message-bot {
+            background: white;
+            border: 1px solid #e2e8f0;
+            margin-right: 20%;
+        }
+
+        .chat-input-area {
+            padding: 20px;
+            border-top: 1px solid #e2e8f0;
+        }
+
+        .input-group {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+
+        .input-group input {
+            flex: 1;
+            padding: 12px 15px;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: 14px;
+        }
+
+        .input-group input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .btn {
+            padding: 12px 20px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.3s;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .quick-actions {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .quick-btn {
+            padding: 6px 12px;
+            background: #edf2f7;
+            border: 1px solid #e2e8f0;
+            border-radius: 15px;
+            cursor: pointer;
+            font-size: 12px;
+            transition: all 0.3s;
+        }
+
+        .quick-btn:hover {
+            background: #667eea;
+            color: white;
+        }
+
+
+
+        /* 滚动条样式 */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #888;
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #555;
+        }
+
+        /* 对话历史样式 */
+        .history-item {
+            padding: 12px;
+            margin-bottom: 10px;
+            border-radius: 8px;
+            background: #f7fafc;
+            border-left: 3px solid #667eea;
+            transition: all 0.3s;
+        }
+
+        .history-item:hover {
+            background: #edf2f7;
+            transform: translateX(3px);
+        }
+
+        .history-role {
+            font-size: 12px;
+            color: #667eea;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .history-content {
+            font-size: 13px;
+            color: #4a5568;
+            line-height: 1.5;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            display: -webkit-box;
+            -webkit-line-clamp: 3;
+            -webkit-box-orient: vertical;
+        }
+
+        .history-time {
+            font-size: 11px;
+            color: #a0aec0;
+            margin-top: 5px;
+        }
+
+        .empty-history {
+            text-align: center;
+            padding: 40px 20px;
+            color: #a0aec0;
+        }
+
+        .empty-history-icon {
+            font-size: 48px;
+            margin-bottom: 15px;
+        }
+
+        /* 手机端适配 */
+        @media screen and (max-width: 1024px) {
+            .main-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .chat-panel {
+                height: auto;
+                min-height: 500px;
+            }
+        }
+
+        @media screen and (max-width: 768px) {
+            body {
+                padding: 10px;
+            }
+
+            .header {
+                padding: 20px;
+                margin-bottom: 15px;
+                border-radius: 12px;
+            }
+
+            .header h1 {
+                font-size: 22px;
+            }
+
+            .header p {
+                font-size: 13px;
+            }
+
+            .nav-links {
+                display: flex;
+                flex-wrap: wrap;
+                gap: 10px;
+            }
+
+            .nav-links a {
+                margin-right: 0;
+                font-size: 13px;
+                padding: 5px 10px;
+                background: #f7fafc;
+                border-radius: 6px;
+            }
+
+            .chat-panel {
+                border-radius: 12px;
+                height: auto;
+                min-height: 600px;
+            }
+
+            .panel-header {
+                padding: 15px;
+            }
+
+            .panel-header h2 {
+                font-size: 16px;
+            }
+
+            .chat-messages {
+                padding: 15px;
+            }
+
+            .message {
+                padding: 10px 14px;
+                font-size: 13px;
+            }
+
+            .message-user {
+                margin-left: 10%;
+            }
+
+            .message-bot {
+                margin-right: 10%;
+            }
+
+            .chat-input-area {
+                padding: 15px;
+            }
+
+            .input-group {
+                flex-direction: column;
+            }
+
+            .input-group input {
+                padding: 10px 12px;
+            }
+
+            .btn {
+                width: 100%;
+                padding: 10px 18px;
+            }
+
+            .quick-actions {
+                justify-content: center;
+            }
+
+            .quick-btn {
+                font-size: 11px;
+                padding: 5px 10px;
+            }
+        }
+
+        @media screen and (max-width: 480px) {
+            .header h1 {
+                font-size: 20px;
+            }
+
+            .nav-links a {
+                font-size: 12px;
+                padding: 4px 8px;
+            }
+
+            .message {
+                font-size: 12px;
+            }
+
+            .quick-btn {
+                font-size: 10px;
+                padding: 4px 8px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- 头部 -->
+        <div class="header">
+            <h1>💬 AI智能办公助理</h1>
+            <p>能说会做的智能办公助手，支持任务管理、文件操作、天气查询等功能</p>
+            <div class="nav-links">
+                <a href="task-manager.html">📋 任务管理</a>
+                <a href="weather-planner.html">🌤️ 天气出行</a>
+                <a href="file-manager.html">📁 文件管理</a>
+            </div>
+        </div>
+
+        <div class="main-grid">
+            <!-- 左侧：AI对话面板 -->
+            <div class="chat-panel">
+                <div class="panel-header">
+                    <h2>🤖 智能对话</h2>
+                </div>
+                <div class="chat-messages" id="chatMessages">
+                    <div class="message message-bot">
+                        👋 你好！我是你的AI办公助理，我可以帮助你：
+                        <br><br>
+                        📋 <strong>任务管理</strong> - 创建、查看、完成任务
+                        <br>
+                        📄 <strong>文件操作</strong> - 创建、读取、管理文件
+                        <br>
+                        🌤️ <strong>天气查询</strong> - 查询天气并给出行建议
+                        <br>
+                        🔢 <strong>数学计算</strong> - 执行各种计算
+                        <br><br>
+                        试着对我说："创建一个任务：完成项目报告"
+                    </div>
+                </div>
+                <div class="chat-input-area">
+                    <div class="input-group">
+                        <input type="text" id="messageInput" placeholder="输入消息..." 
+                               onkeypress="if(event.key==='Enter') sendMessage()">
+                        <button class="btn btn-primary" onclick="sendMessage()">发送</button>
+                    </div>
+                    <div class="quick-actions">
+                        <button class="quick-btn" onclick="sendQuickMessage('创建任务：完成作业')">📋 创建任务</button>
+                        <button class="quick-btn" onclick="sendQuickMessage('查看我的任务')">📋 查看任务</button>
+                        <button class="quick-btn" onclick="sendQuickMessage('北京天气怎么样？')">🌤️ 查询天气</button>
+                        <button class="quick-btn" onclick="sendQuickMessage('计算 125 * 8 + 50')">🔢 计算器</button>
+                        <button class="quick-btn" onclick="sendQuickMessage('创建文件 test.txt 内容为Hello World')">📄 创建文件</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 右侧：对话历史面板 -->
+            <div class="chat-panel">
+                <div class="panel-header">
+                    <h2>📜 过去对话</h2>
+                </div>
+                <div class="chat-messages" id="conversationHistory" style="padding: 20px;">
+                    <div class="empty-history">
+                        <div class="empty-history-icon">💬</div>
+                        <p>暂无对话记录</p>
+                        <p style="font-size: 12px; margin-top: 10px;">开始聊天后，这里会显示你的对话历史</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 生成或获取用户ID
+        let userId = localStorage.getItem('agentUserId');
+        if (!userId) {
+            userId = 'user_' + Math.random().toString(36).substring(2, 10);
+            localStorage.setItem('agentUserId', userId);
+        }
+
+        const chatMessages = document.getElementById('chatMessages');
+        const messageInput = document.getElementById('messageInput');
+        const conversationHistory = document.getElementById('conversationHistory');
+
+        // 添加消息到聊天区
+        function addMessage(content, isUser) {
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${isUser ? 'message-user' : 'message-bot'}`;
+            messageDiv.innerHTML = content;
+            chatMessages.appendChild(messageDiv);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+
+        // 加载对话历史
+        async function loadConversationHistory() {
+            try {
+                const response = await fetch(`/agent/recent-conversations?userId=${userId}&limit=20`);
+                const result = await response.json();
+
+                if (result.code === 1 && result.data && result.data.length > 0) {
+                    conversationHistory.innerHTML = '';
+                    
+                    result.data.forEach(item => {
+                        const historyItem = document.createElement('div');
+                        historyItem.className = 'history-item';
+                        
+                        const roleText = item.role === 'user' ? '👤 你' : '🤖 AI助理';
+                        const timeStr = formatTime(item.createdAt);
+                        
+                        historyItem.innerHTML = `
+                            <div class="history-role">${roleText}</div>
+                            <div class="history-content">${escapeHtml(item.content)}</div>
+                            <div class="history-time">${timeStr}</div>
+                        `;
+                        
+                        conversationHistory.appendChild(historyItem);
+                    });
+                } else {
+                    showEmptyHistory();
+                }
+            } catch (error) {
+                console.error('加载对话历史失败:', error);
+                showEmptyHistory();
+            }
+        }
+
+        // 显示空历史提示
+        function showEmptyHistory() {
+            conversationHistory.innerHTML = `
+                <div class="empty-history">
+                    <div class="empty-history-icon">💬</div>
+                    <p>暂无对话记录</p>
+                    <p style="font-size: 12px; margin-top: 10px;">开始聊天后，这里会显示你的对话历史</p>
+                </div>
+            `;
+        }
+
+        // 格式化时间
+        function formatTime(timeStr) {
+            if (!timeStr) return '';
+            
+            try {
+                const date = new Date(timeStr);
+                const now = new Date();
+                const diff = now - date;
+                
+                // 小于1分钟
+                if (diff < 60000) {
+                    return '刚刚';
+                }
+                // 小于1小时
+                if (diff < 3600000) {
+                    return Math.floor(diff / 60000) + '分钟前';
+                }
+                // 小于24小时
+                if (diff < 86400000) {
+                    return Math.floor(diff / 3600000) + '小时前';
+                }
+                // 小于7天
+                if (diff < 604800000) {
+                    return Math.floor(diff / 86400000) + '天前';
+                }
+                
+                // 超过7天，显示具体日期
+                const year = date.getFullYear();
+                const month = String(date.getMonth() + 1).padStart(2, '0');
+                const day = String(date.getDate()).padStart(2, '0');
+                const hours = String(date.getHours()).padStart(2, '0');
+                const minutes = String(date.getMinutes()).padStart(2, '0');
+                
+                return `${year}-${month}-${day} ${hours}:${minutes}`;
+            } catch (e) {
+                return timeStr;
+            }
+        }
+
+        // HTML转义
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+
+
+        // 发送消息
+        async function sendMessage() {
+            const message = messageInput.value.trim();
+            if (!message) return;
+
+            // 添加用户消息
+            addMessage(message, true);
+            messageInput.value = '';
+
+            try {
+                const response = await fetch('/agent/chat', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        userId: userId,
+                        message: message
+                    })
+                });
+
+                const result = await response.json();
+
+                if (result.code === 1) {
+                    // 格式化AI回复（将换行符转换为<br>）
+                    const formattedResponse = result.data.replace(/\n/g, '<br>');
+                    addMessage(formattedResponse, false);
+                    
+                    // 刷新对话历史
+                    setTimeout(() => loadConversationHistory(), 500);
+                } else {
+                    addMessage('❌ 错误：' + result.msg, false);
+                }
+            } catch (error) {
+                addMessage('❌ 网络错误：' + error.message, false);
+            } finally {
+                messageInput.focus();
+            }
+        }
+
+        // 发送快捷消息
+        function sendQuickMessage(message) {
+            messageInput.value = message;
+            sendMessage();
+        }
+
+        // 页面加载时聚焦输入框
+        window.onload = () => {
+            messageInput.focus();
+            loadConversationHistory();
+        };
+    </script>
+</body>
+</html>

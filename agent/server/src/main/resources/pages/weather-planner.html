@@ -1,0 +1,937 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>天气出行助手 - AI智能助理</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Microsoft YaHei', Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .header {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            margin-bottom: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        }
+
+        .header h1 {
+            color: #2d3748;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            color: #718096;
+        }
+
+        .nav-links {
+            margin-top: 15px;
+        }
+
+        .nav-links a {
+            color: #667eea;
+            text-decoration: none;
+            margin-right: 20px;
+        }
+
+        .nav-links a:hover {
+            text-decoration: underline;
+        }
+
+        .main-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        /* 查询面板 */
+        .query-panel {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            overflow: hidden;
+        }
+
+        .panel-header {
+            padding: 20px;
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+        }
+
+        .panel-header h2 {
+            font-size: 18px;
+            margin-bottom: 5px;
+        }
+
+        .panel-header p {
+            font-size: 12px;
+            opacity: 0.9;
+        }
+
+        .query-content {
+            padding: 30px;
+        }
+
+        .city-selector {
+            margin-bottom: 25px;
+        }
+
+        .city-selector label {
+            display: block;
+            margin-bottom: 10px;
+            color: #4a5568;
+            font-weight: bold;
+        }
+
+        .city-input-group {
+            display: flex;
+            gap: 10px;
+        }
+
+        .city-input-group input {
+            flex: 1;
+            padding: 12px 15px;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: 14px;
+        }
+
+        .city-input-group input:focus {
+            outline: none;
+            border-color: #f093fb;
+        }
+
+        .btn {
+            padding: 12px 20px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.3s;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(240, 147, 251, 0.4);
+        }
+
+        .quick-cities {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-top: 15px;
+        }
+
+        .city-chip {
+            padding: 8px 15px;
+            background: #edf2f7;
+            border: 1px solid #e2e8f0;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 13px;
+            transition: all 0.3s;
+        }
+
+        .city-chip:hover {
+            background: #f093fb;
+            color: white;
+            border-color: #f093fb;
+        }
+
+        .chat-section {
+            border-top: 2px solid #e2e8f0;
+            padding: 20px;
+            background: #f7fafc;
+        }
+
+        .chat-title {
+            font-size: 14px;
+            color: #4a5568;
+            margin-bottom: 15px;
+            font-weight: bold;
+        }
+
+        .chat-messages {
+            max-height: 300px;
+            overflow-y: auto;
+            margin-bottom: 15px;
+        }
+
+        .message {
+            margin-bottom: 12px;
+            padding: 10px 15px;
+            border-radius: 10px;
+            line-height: 1.6;
+            font-size: 13px;
+        }
+
+        .message-user {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+            margin-left: 20%;
+        }
+
+        .message-bot {
+            background: white;
+            border: 1px solid #e2e8f0;
+            margin-right: 20%;
+        }
+
+        .chat-input {
+            display: flex;
+            gap: 10px;
+        }
+
+        .chat-input input {
+            flex: 1;
+            padding: 10px 15px;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: 13px;
+        }
+
+        .chat-input input:focus {
+            outline: none;
+            border-color: #f093fb;
+        }
+
+        /* 天气展示面板 */
+        .weather-panel {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            overflow: hidden;
+        }
+
+        .weather-display {
+            padding: 40px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            text-align: center;
+            min-height: 400px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .weather-icon {
+            font-size: 100px;
+            margin-bottom: 20px;
+            animation: float 3s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+
+        .weather-city {
+            font-size: 32px;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+        .weather-condition {
+            font-size: 24px;
+            margin-bottom: 20px;
+            opacity: 0.9;
+        }
+
+        .weather-temp {
+            font-size: 64px;
+            font-weight: bold;
+            margin-bottom: 30px;
+        }
+
+        .weather-details {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .detail-item {
+            background: rgba(255, 255, 255, 0.2);
+            padding: 15px;
+            border-radius: 10px;
+            backdrop-filter: blur(10px);
+        }
+
+        .detail-label {
+            font-size: 12px;
+            opacity: 0.8;
+            margin-bottom: 5px;
+        }
+
+        .detail-value {
+            font-size: 20px;
+            font-weight: bold;
+        }
+
+        /* 出行建议 */
+        .travel-advice {
+            padding: 30px;
+            background: #fffaf0;
+            border-top: 2px solid #fed7aa;
+        }
+
+        .advice-title {
+            font-size: 18px;
+            color: #c05621;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .advice-content {
+            color: #744210;
+            line-height: 1.8;
+            font-size: 14px;
+        }
+
+        .advice-tips {
+            margin-top: 20px;
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+        }
+
+        .tip-card {
+            background: white;
+            padding: 15px;
+            border-radius: 10px;
+            border-left: 4px solid #f6ad55;
+        }
+
+        .tip-icon {
+            font-size: 24px;
+            margin-bottom: 8px;
+        }
+
+        .tip-text {
+            font-size: 13px;
+            color: #4a5568;
+        }
+
+        /* 空状态 */
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+        }
+
+        .empty-icon {
+            font-size: 80px;
+            margin-bottom: 20px;
+            opacity: 0.5;
+        }
+
+        .empty-text {
+            font-size: 18px;
+            color: #a0aec0;
+            margin-bottom: 10px;
+        }
+
+        .empty-hint {
+            font-size: 14px;
+            color: #cbd5e0;
+        }
+
+        /* 加载动画 */
+        .loading {
+            text-align: center;
+            padding: 60px 20px;
+        }
+
+        .spinner {
+            border: 4px solid rgba(255, 255, 255, 0.3);
+            border-top: 4px solid white;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #888;
+            border-radius: 4px;
+        }
+
+        /* 手机端适配 */
+        @media screen and (max-width: 1024px) {
+            .main-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .query-panel,
+            .weather-panel {
+                height: auto;
+            }
+        }
+
+        @media screen and (max-width: 768px) {
+            body {
+                padding: 10px;
+            }
+
+            .header {
+                padding: 20px;
+                margin-bottom: 15px;
+                border-radius: 12px;
+            }
+
+            .header h1 {
+                font-size: 22px;
+            }
+
+            .header p {
+                font-size: 13px;
+            }
+
+            .nav-links {
+                display: flex;
+                flex-wrap: wrap;
+                gap: 10px;
+            }
+
+            .nav-links a {
+                margin-right: 0;
+                font-size: 13px;
+                padding: 5px 10px;
+                background: #f7fafc;
+                border-radius: 6px;
+            }
+
+            .panel-header {
+                padding: 15px;
+            }
+
+            .panel-header h2 {
+                font-size: 16px;
+            }
+
+            .query-content {
+                padding: 20px;
+            }
+
+            .city-input-group {
+                flex-direction: column;
+            }
+
+            .btn {
+                width: 100%;
+                padding: 10px 18px;
+            }
+
+            .quick-cities {
+                justify-content: center;
+            }
+
+            .city-chip {
+                font-size: 12px;
+                padding: 6px 12px;
+            }
+
+            .chat-messages {
+                max-height: 200px;
+            }
+
+            .message {
+                padding: 8px 12px;
+                font-size: 12px;
+            }
+
+            .message-user {
+                margin-left: 10%;
+            }
+
+            .message-bot {
+                margin-right: 10%;
+            }
+
+            .chat-input {
+                flex-direction: column;
+            }
+
+            .chat-input input {
+                padding: 10px 12px;
+                font-size: 13px;
+            }
+
+            .weather-display {
+                padding: 30px 20px;
+                min-height: 350px;
+            }
+
+            .weather-icon {
+                font-size: 80px;
+            }
+
+            .weather-city {
+                font-size: 28px;
+            }
+
+            .weather-condition {
+                font-size: 20px;
+            }
+
+            .weather-temp {
+                font-size: 48px;
+            }
+
+            .weather-details {
+                grid-template-columns: repeat(3, 1fr);
+                gap: 10px;
+            }
+
+            .detail-item {
+                padding: 10px;
+            }
+
+            .detail-label {
+                font-size: 11px;
+            }
+
+            .detail-value {
+                font-size: 16px;
+            }
+
+            .travel-advice {
+                padding: 20px;
+            }
+
+            .advice-title {
+                font-size: 16px;
+            }
+
+            .advice-content {
+                font-size: 13px;
+            }
+
+            .advice-tips {
+                grid-template-columns: 1fr;
+            }
+
+            .tip-card {
+                padding: 12px;
+            }
+
+            .tip-icon {
+                font-size: 20px;
+            }
+
+            .tip-text {
+                font-size: 12px;
+            }
+        }
+
+        @media screen and (max-width: 480px) {
+            .header h1 {
+                font-size: 20px;
+            }
+
+            .nav-links a {
+                font-size: 12px;
+                padding: 4px 8px;
+            }
+
+            .message {
+                font-size: 11px;
+            }
+
+            .weather-icon {
+                font-size: 60px;
+            }
+
+            .weather-city {
+                font-size: 24px;
+            }
+
+            .weather-temp {
+                font-size: 40px;
+            }
+
+            .weather-details {
+                grid-template-columns: 1fr;
+            }
+
+            .city-chip {
+                font-size: 11px;
+                padding: 5px 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- 头部 -->
+        <div class="header">
+            <h1>🌤️ 天气出行助手</h1>
+            <p>查询天气信息，获取智能出行建议</p>
+            <div class="nav-links">
+                <a href="index.html">💬 智能对话</a>
+                <a href="task-manager.html">📋 任务管理</a>
+                <a href="file-manager.html">📁 文件管理</a>
+            </div>
+        </div>
+
+        <div class="main-grid">
+            <!-- 左侧：查询面板 -->
+            <div class="query-panel">
+                <div class="panel-header">
+                    <h2>🔍 天气查询</h2>
+                    <p>输入城市名称或自然语言查询</p>
+                </div>
+
+                <div class="query-content">
+                    <div class="city-selector">
+                        <label>选择城市</label>
+                        <div class="city-input-group">
+                            <input type="text" id="cityInput" placeholder="输入城市名称..." 
+                                   value="北京" onkeypress="if(event.key==='Enter') queryWeather()">
+                            <button class="btn btn-primary" onclick="queryWeather()">查询</button>
+                        </div>
+                    </div>
+
+                    <div class="quick-cities">
+                        <span class="city-chip" onclick="selectCity('北京')">北京</span>
+                        <span class="city-chip" onclick="selectCity('上海')">上海</span>
+                        <span class="city-chip" onclick="selectCity('广州')">广州</span>
+                        <span class="city-chip" onclick="selectCity('深圳')">深圳</span>
+                        <span class="city-chip" onclick="selectCity('杭州')">杭州</span>
+                        <span class="city-chip" onclick="selectCity('成都')">成都</span>
+                    </div>
+                </div>
+
+                <div class="chat-section">
+                    <div class="chat-title">💬 智能对话查询</div>
+                    <div class="chat-messages" id="chatMessages">
+                        <div class="message message-bot">
+                            👋 你可以这样问我：
+                            <br>• "北京天气怎么样？"
+                            <br>• "明天需要带伞吗？"
+                            <br>• "适合出去游玩吗？"
+                        </div>
+                    </div>
+                    <div class="chat-input">
+                        <input type="text" id="chatInput" placeholder="输入问题..." 
+                               onkeypress="if(event.key==='Enter') sendChat()">
+                        <button class="btn btn-primary" onclick="sendChat()">发送</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 右侧：天气展示 -->
+            <div class="weather-panel">
+                <div id="weatherContent">
+                    <div class="weather-display">
+                        <div class="empty-state">
+                            <div class="empty-icon">🌤️</div>
+                            <div class="empty-text">开始查询天气</div>
+                            <div class="empty-hint">在左侧输入城市名称或提问</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let userId = localStorage.getItem('agentUserId');
+        if (!userId) {
+            userId = 'user_' + Math.random().toString(36).substring(2, 10);
+            localStorage.setItem('agentUserId', userId);
+        }
+
+        // 选择城市
+        function selectCity(city) {
+            document.getElementById('cityInput').value = city;
+            queryWeather();
+        }
+
+        // 查询天气
+        async function queryWeather() {
+            const city = document.getElementById('cityInput').value.trim();
+            if (!city) {
+                alert('请输入城市名称');
+                return;
+            }
+
+            const weatherContent = document.getElementById('weatherContent');
+            weatherContent.innerHTML = `
+                <div class="weather-display">
+                    <div class="loading">
+                        <div class="spinner"></div>
+                        <div style="color: white;">正在查询 ${city} 的天气...</div>
+                    </div>
+                </div>
+            `;
+
+            try {
+                const response = await fetch('/agent/chat', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ 
+                        userId, 
+                        message: `${city}天气怎么样？` 
+                    })
+                });
+
+                const result = await response.json();
+                
+                if (result.code === 1) {
+                    parseAndDisplayWeather(result.data, city);
+                } else {
+                    showError('查询失败：' + result.msg);
+                }
+            } catch (error) {
+                showError('网络错误：' + error.message);
+            }
+        }
+
+        // 解析并显示天气
+        function parseAndDisplayWeather(responseText, city) {
+            const weatherContent = document.getElementById('weatherContent');
+            
+            // 尝试解析天气数据
+            const lines = responseText.split('\n');
+            let weatherData = {
+                condition: '晴',
+                temp: 22,
+                humidity: 50,
+                windSpeed: 3,
+                advice: '天气不错，适合出行！'
+            };
+
+            lines.forEach(line => {
+                if (line.includes('天气:')) {
+                    weatherData.condition = line.split('天气:')[1].trim();
+                } else if (line.includes('温度:')) {
+                    weatherData.temp = parseFloat(line.split('温度:')[1].replace('°C', '').trim());
+                } else if (line.includes('湿度:')) {
+                    weatherData.humidity = parseInt(line.split('湿度:')[1].replace('%', '').trim());
+                } else if (line.includes('风速:')) {
+                    weatherData.windSpeed = parseFloat(line.split('风速:')[1].replace('m/s', '').trim());
+                } else if (line.includes('出行建议:')) {
+                    weatherData.advice = line.split('出行建议:')[1].trim();
+                }
+            });
+
+            // 根据天气条件选择图标
+            const iconMap = {
+                '晴': '☀️',
+                '多云': '⛅',
+                '阴': '☁️',
+                '小雨': '🌦️',
+                '中雨': '🌧️',
+                '大雨': '⛈️',
+                '雪': '❄️'
+            };
+
+            const weatherIcon = iconMap[weatherData.condition] || '🌤️';
+
+            weatherContent.innerHTML = `
+                <div class="weather-display">
+                    <div class="weather-icon">${weatherIcon}</div>
+                    <div class="weather-city">${city}</div>
+                    <div class="weather-condition">${weatherData.condition}</div>
+                    <div class="weather-temp">${weatherData.temp.toFixed(1)}°C</div>
+                    
+                    <div class="weather-details">
+                        <div class="detail-item">
+                            <div class="detail-label">💧 湿度</div>
+                            <div class="detail-value">${weatherData.humidity}%</div>
+                        </div>
+                        <div class="detail-item">
+                            <div class="detail-label">💨 风速</div>
+                            <div class="detail-value">${weatherData.windSpeed} m/s</div>
+                        </div>
+                        <div class="detail-item">
+                            <div class="detail-label">🌡️ 体感</div>
+                            <div class="detail-value">${getFeelsLike(weatherData.temp, weatherData.humidity)}°C</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="travel-advice">
+                    <div class="advice-title">
+                        💡 出行建议
+                    </div>
+                    <div class="advice-content">
+                        ${weatherData.advice}
+                    </div>
+                    
+                    <div class="advice-tips">
+                        ${generateTips(weatherData)}
+                    </div>
+                </div>
+            `;
+        }
+
+        // 计算体感温度
+        function getFeelsLike(temp, humidity) {
+            // 简化计算
+            if (temp > 27 && humidity > 40) {
+                return (temp + 2).toFixed(1);
+            } else if (temp < 10) {
+                return (temp - 2).toFixed(1);
+            }
+            return temp.toFixed(1);
+        }
+
+        // 生成建议卡片
+        function generateTips(weatherData) {
+            const tips = [];
+
+            // 根据天气给建议
+            if (weatherData.condition.includes('雨')) {
+                tips.push({
+                    icon: '☂️',
+                    text: '记得携带雨伞'
+                });
+            }
+
+            if (weatherData.temp < 15) {
+                tips.push({
+                    icon: '🧥',
+                    text: '天气较冷，注意保暖'
+                });
+            } else if (weatherData.temp > 30) {
+                tips.push({
+                    icon: '🕶️',
+                    text: '注意防晒防暑'
+                });
+            }
+
+            if (weatherData.windSpeed > 5) {
+                tips.push({
+                    icon: '🌬️',
+                    text: '风力较大，注意安全'
+                });
+            }
+
+            if (weatherData.humidity > 70) {
+                tips.push({
+                    icon: '💦',
+                    text: '湿度较高，注意防潮'
+                });
+            }
+
+            // 默认建议
+            if (tips.length === 0) {
+                tips.push({
+                    icon: '✅',
+                    text: '天气适宜，放心出行'
+                });
+            }
+
+            return tips.map(tip => `
+                <div class="tip-card">
+                    <div class="tip-icon">${tip.icon}</div>
+                    <div class="tip-text">${tip.text}</div>
+                </div>
+            `).join('');
+        }
+
+        // 显示错误
+        function showError(message) {
+            const weatherContent = document.getElementById('weatherContent');
+            weatherContent.innerHTML = `
+                <div class="weather-display">
+                    <div class="empty-state">
+                        <div class="empty-icon">⚠️</div>
+                        <div class="empty-text">${message}</div>
+                        <div class="empty-hint">请稍后重试</div>
+                    </div>
+                </div>
+            `;
+        }
+
+        // 发送聊天消息
+        async function sendChat() {
+            const input = document.getElementById('chatInput');
+            const message = input.value.trim();
+            if (!message) return;
+
+            addChatMessage(message, true);
+            input.value = '';
+
+            try {
+                const response = await fetch('/agent/chat', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ userId, message })
+                });
+
+                const result = await response.json();
+                
+                if (result.code === 1) {
+                    const formattedResponse = result.data.replace(/\n/g, '<br>');
+                    addChatMessage(formattedResponse, false);
+                    
+                    // 如果包含天气信息，更新天气显示
+                    if (message.includes('天气')) {
+                        const cityMatch = message.match(/(.+?)天气/);
+                        if (cityMatch) {
+                            setTimeout(() => queryWeather(), 500);
+                        }
+                    }
+                } else {
+                    addChatMessage('❌ 错误：' + result.msg, false);
+                }
+            } catch (error) {
+                addChatMessage('❌ 网络错误：' + error.message, false);
+            }
+        }
+
+        function addChatMessage(content, isUser) {
+            const chatMessages = document.getElementById('chatMessages');
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${isUser ? 'message-user' : 'message-bot'}`;
+            messageDiv.innerHTML = content;
+            chatMessages.appendChild(messageDiv);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+
+        // 页面加载时自动查询默认城市
+        window.onload = () => {
+            queryWeather();
+        };
+    </script>
+</body>
+</html>
