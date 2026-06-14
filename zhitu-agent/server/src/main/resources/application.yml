@@ -90,4 +90,4 @@ pagehelper:
 # 获取地址：https://console.amap.com/
 amap:
   api:
-    key: ${AMAP_API_KEY:6d1854e59dd9781d8421f6fb12ef3c1f}
+    key: ${amap.api.key}
