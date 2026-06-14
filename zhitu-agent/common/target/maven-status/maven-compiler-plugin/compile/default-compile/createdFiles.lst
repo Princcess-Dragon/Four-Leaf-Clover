@@ -1,0 +1,9 @@
+com\clover\constant\MessageConstant.class
+com\clover\properties\JwtProperties.class
+com\clover\constant\JwtClaimsConstant.class
+com\clover\context\BaseContext.class
+com\clover\exception\BaseException.class
+com\clover\json\JacksonObjectMapper.class
+com\clover\utils\CaptchaCodeUtil.class
+com\clover\utils\JwtUtil.class
+META-INF\spring-configuration-metadata.json
