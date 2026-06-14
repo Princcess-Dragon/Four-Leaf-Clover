@@ -1,0 +1,965 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>知途 - AI旅游助手智能体</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Microsoft YaHei', Arial, sans-serif;
+            background: #f5f5f5;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        .app-container {
+            display: flex;
+            height: 100vh;
+        }
+
+        /* 左侧会话列表 */
+        .sidebar {
+            width: 260px;
+            background: white;
+            border-right: 1px solid #e0e0e0;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .sidebar-header {
+            padding: 20px;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .new-chat-btn {
+            width: 100%;
+            padding: 12px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.3s;
+        }
+
+        .new-chat-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .session-list {
+            flex: 1;
+            overflow-y: auto;
+            padding: 10px;
+        }
+
+        .session-item {
+            padding: 12px;
+            margin-bottom: 8px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+            position: relative;
+        }
+
+        .session-item:hover {
+            background: #f5f5f5;
+        }
+
+        .session-item.active {
+            background: #e8eaf6;
+            border-left: 3px solid #667eea;
+        }
+
+        .session-title {
+            font-size: 14px;
+            color: #333;
+            margin-bottom: 5px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .session-time {
+            font-size: 12px;
+            color: #999;
+        }
+
+        .session-delete {
+            position: absolute;
+            right: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            color: #999;
+            cursor: pointer;
+            font-size: 18px;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .session-item:hover .session-delete {
+            opacity: 1;
+        }
+
+        .session-delete:hover {
+            color: #f44336;
+        }
+
+        /* 右侧聊天区域 */
+        .chat-area {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            background: white;
+        }
+
+        .chat-header {
+            padding: 20px;
+            border-bottom: 1px solid #e0e0e0;
+            background: white;
+        }
+
+        .chat-header h2 {
+            font-size: 18px;
+            color: #333;
+        }
+
+        .chat-messages {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px;
+            background: #f9f9f9;
+        }
+
+        .message {
+            margin-bottom: 20px;
+            animation: fadeIn 0.3s ease-in;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .message-user {
+            display: flex;
+            justify-content: flex-end;
+        }
+
+        .message-bot {
+            display: flex;
+            justify-content: flex-start;
+        }
+
+        .message-content {
+            max-width: 70%;
+            padding: 12px 18px;
+            border-radius: 12px;
+            line-height: 1.6;
+            word-break: break-word;
+        }
+
+        .message-user .message-content {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .message-bot .message-content {
+            background: white;
+            border: 1px solid #e0e0e0;
+            color: #333;
+        }
+
+        .message-bot .message-content:has(.route-card) {
+            max-width: 85%;
+        }
+
+        .chat-input-area {
+            padding: 20px;
+            border-top: 1px solid #e0e0e0;
+            background: white;
+        }
+
+        .input-group {
+            display: flex;
+            gap: 10px;
+        }
+
+        .input-group input {
+            flex: 1;
+            padding: 12px 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 14px;
+        }
+
+        .input-group input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .btn-send {
+            padding: 12px 24px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.3s;
+        }
+
+        .btn-send:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .empty-state {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+            color: #999;
+        }
+
+        .empty-state-icon {
+            font-size: 64px;
+            margin-bottom: 20px;
+        }
+
+        .empty-state-text {
+            font-size: 16px;
+        }
+
+        /* 滚动条样式 */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #888;
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #555;
+        }
+
+        /* 地图路线卡片样式 */
+        .route-card {
+            margin-top: 12px;
+            border: 1px solid #e0e0e0;
+            border-radius: 12px;
+            overflow: hidden;
+            background: #fff;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        }
+
+        .route-map-container {
+            width: 100%;
+            height: 300px;
+            background: #f0f0f0;
+            position: relative;
+        }
+
+        .route-map-container .map-loading {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: #999;
+            font-size: 14px;
+        }
+
+        .route-info-bar {
+            display: flex;
+            gap: 20px;
+            padding: 12px 16px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            font-size: 13px;
+        }
+
+        .route-info-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .route-info-item .icon {
+            font-size: 16px;
+        }
+
+        .route-steps {
+            padding: 12px 16px;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+
+        .route-step-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            padding: 8px 0;
+            border-bottom: 1px solid #f0f0f0;
+            font-size: 13px;
+            color: #555;
+        }
+
+        .route-step-item:last-child {
+            border-bottom: none;
+        }
+
+        .route-step-num {
+            min-width: 22px;
+            height: 22px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 11px;
+            font-weight: bold;
+            flex-shrink: 0;
+        }
+
+        .route-step-text {
+            flex: 1;
+            line-height: 1.5;
+        }
+
+        .route-step-meta {
+            color: #999;
+            font-size: 12px;
+            white-space: nowrap;
+        }
+
+        .route-mode-badge {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 600;
+            margin-left: 8px;
+        }
+
+        .route-mode-driving { background: #e3f2fd; color: #1565c0; }
+        .route-mode-walking { background: #e8f5e9; color: #2e7d32; }
+        .route-mode-transit { background: #fff3e0; color: #e65100; }
+
+        /* 响应式设计 */
+        @media screen and (max-width: 768px) {
+            .sidebar {
+                width: 200px;
+            }
+
+            .message-content {
+                max-width: 85%;
+            }
+        }
+
+        @media screen and (max-width: 480px) {
+            .sidebar {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- 高德地图 JS API -->
+    <script src="https://webapi.amap.com/maps?v=2.0&key=6d1854e59dd9781d8421f6fb12ef3c1f"></script>
+    <div class="app-container">
+        <!-- 左侧会话列表 -->
+        <div class="sidebar">
+            <div class="sidebar-header">
+                <button class="new-chat-btn" onclick="createNewSession()">+ 新建对话</button>
+            </div>
+            <div class="session-list" id="sessionList">
+                <!-- 会话列表将在这里动态生成 -->
+            </div>
+        </div>
+
+        <!-- 右侧聊天区域 -->
+        <div class="chat-area">
+            <div class="chat-header">
+                <h2 id="chatTitle">知途旅游助手</h2>
+            </div>
+            <div class="chat-messages" id="chatMessages">
+                <div class="empty-state">
+                    <div class="empty-state-icon">💬</div>
+                    <div class="empty-state-text">开始规划你的完美旅程吧！</div>
+                </div>
+            </div>
+            <div class="chat-input-area">
+                <div class="input-group">
+                    <input type="text" id="messageInput" placeholder="输入消息..." 
+                           onkeypress="if(event.key==='Enter') sendMessage()">
+                    <button class="btn-send" onclick="sendMessage()">发送</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 获取登录用户的userId（与数据库user表的user_id一致）
+        let userId = localStorage.getItem('userId');
+        if (!userId) {
+            // 未登录，跳转到登录页
+            window.location.href = '/login';
+        }
+
+        let currentSessionId = null;
+        const chatMessages = document.getElementById('chatMessages');
+        const messageInput = document.getElementById('messageInput');
+        const sessionList = document.getElementById('sessionList');
+        const chatTitle = document.getElementById('chatTitle');
+
+        // 加载会话列表
+        async function loadSessionList() {
+            try {
+                const response = await fetch(`/agent/sessions?userId=${userId}`);
+                const result = await response.json();
+
+                if (result.code === 1 && result.data && result.data.length > 0) {
+                    sessionList.innerHTML = '';
+                    
+                    result.data.forEach(session => {
+                        const sessionItem = document.createElement('div');
+                        sessionItem.className = 'session-item';
+                        sessionItem.dataset.sessionId = session.sessionId;
+                        
+                        const title = session.sessionTitle || '新对话';
+                        const timeStr = formatTime(session.createdAt);
+                        
+                        sessionItem.innerHTML = `
+                            <div class="session-title">${escapeHtml(title)}</div>
+                            <div class="session-time">${timeStr}</div>
+                            <button class="session-delete" onclick="deleteSession(event, '${session.sessionId}')">×</button>
+                        `;
+                        
+                        sessionItem.onclick = (e) => {
+                            if (!e.target.classList.contains('session-delete')) {
+                                switchSession(session.sessionId, title);
+                            }
+                        };
+                        
+                        sessionList.appendChild(sessionItem);
+                    });
+                } else {
+                    sessionList.innerHTML = '<div style="padding: 20px; text-align: center; color: #999;">暂无会话</div>';
+                }
+            } catch (error) {
+                console.error('加载会话列表失败:', error);
+            }
+        }
+
+        // 创建新会话
+        async function createNewSession() {
+            try {
+                const response = await fetch('/agent/sessions', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        userId: userId,
+                        sessionTitle: '新对话'
+                    })
+                });
+
+                const result = await response.json();
+
+                if (result.code === 1) {
+                    currentSessionId = result.data;
+                    chatMessages.innerHTML = '';
+                    chatTitle.textContent = '新对话';
+                    
+                    // 添加欢迎消息
+                    addMessage('👋 你好！我是知途，你的全维度旅游助手智能体。\n\n我可以帮你规划行程、推荐美食、查询天气、安排交通、讲解典故、管理预算。\n\n请告诉我你想去哪里旅行？', false);
+                    
+                    // 重新加载会话列表
+                    loadSessionList();
+                } else {
+                    alert('创建会话失败：' + result.msg);
+                }
+            } catch (error) {
+                console.error('创建会话失败:', error);
+                alert('创建会话失败：' + error.message);
+            }
+        }
+
+        // 切换会话
+        async function switchSession(sessionId, title) {
+            try {
+                const response = await fetch('/agent/sessions/switch', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        userId: userId,
+                        sessionId: sessionId
+                    })
+                });
+
+                const result = await response.json();
+
+                if (result.code === 1) {
+                    currentSessionId = sessionId;
+                    chatTitle.textContent = title || '对话';
+                    
+                    // 清空聊天区域
+                    chatMessages.innerHTML = '';
+                    
+                    // 加载该会话的历史消息
+                    await loadSessionHistory(sessionId);
+                    
+                    // 更新会话列表的选中状态
+                    document.querySelectorAll('.session-item').forEach(item => {
+                        item.classList.remove('active');
+                        if (item.dataset.sessionId === sessionId) {
+                            item.classList.add('active');
+                        }
+                    });
+                } else {
+                    alert('切换会话失败：' + result.msg);
+                }
+            } catch (error) {
+                console.error('切换会话失败:', error);
+                alert('切换会话失败：' + error.message);
+            }
+        }
+
+        // 加载会话历史
+        async function loadSessionHistory(sessionId) {
+            try {
+                console.log('开始加载会话历史, sessionId:', sessionId);
+                const response = await fetch(`/agent/history?userId=${userId}&sessionId=${sessionId}`);
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                
+                const result = await response.json();
+                console.log('会话历史响应:', result);
+
+                if (result.code === 1) {
+                    if (result.data && result.data.length > 0) {
+                        chatMessages.innerHTML = '';
+                        
+                        result.data.forEach(msg => {
+                            if (msg.role !== 'system') {
+                                addMessage(msg.content, msg.role === 'user');
+                            }
+                        });
+                        
+                        console.log(`成功加载 ${result.data.length} 条历史消息`);
+                    } else {
+                        console.log('该会话暂无历史记录');
+                        chatMessages.innerHTML = `
+                            <div class="empty-state">
+                                <div class="empty-state-icon">💬</div>
+                                <div class="empty-state-text">开始规划你的完美旅程吧！</div>
+                            </div>
+                        `;
+                    }
+                } else {
+                    console.error('获取历史失败:', result.msg);
+                    chatMessages.innerHTML = `
+                        <div class="empty-state">
+                            <div class="empty-state-icon">⚠️</div>
+                            <div class="empty-state-text">加载失败：${result.msg || '未知错误'}</div>
+                        </div>
+                    `;
+                }
+            } catch (error) {
+                console.error('加载会话历史失败:', error);
+                chatMessages.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-state-icon">❌</div>
+                        <div class="empty-state-text">网络错误：${error.message}</div>
+                    </div>
+                `;
+            }
+        }
+
+        // 删除会话
+        async function deleteSession(event, sessionId) {
+            event.stopPropagation();
+            
+            if (!confirm('确定要删除这个会话吗？')) {
+                return;
+            }
+
+            try {
+                const response = await fetch(`/agent/sessions/${sessionId}?userId=${userId}`, {
+                    method: 'DELETE'
+                });
+
+                const result = await response.json();
+
+                if (result.code === 1) {
+                    // 如果删除的是当前会话，清空聊天区域
+                    if (sessionId === currentSessionId) {
+                        currentSessionId = null;
+                        chatMessages.innerHTML = `
+                            <div class="empty-state">
+                                <div class="empty-state-icon">💬</div>
+                                <div class="empty-state-text">开始规划你的完美旅程吧！</div>
+                            </div>
+                        `;
+                        chatTitle.textContent = '知途旅游助手';
+                    }
+                    
+                    // 重新加载会话列表
+                    loadSessionList();
+                } else {
+                    alert('删除会话失败：' + result.msg);
+                }
+            } catch (error) {
+                console.error('删除会话失败:', error);
+                alert('删除会话失败：' + error.message);
+            }
+        }
+
+        // 地图实例缓存（用于复用地图实例）
+        let mapCounter = 0;
+
+        // 解析路线数据
+        function parseRouteData(content) {
+            const startMarker = '<!--ROUTE_DATA_START-->';
+            const endMarker = '<!--ROUTE_DATA_END-->';
+            const startIdx = content.indexOf(startMarker);
+            const endIdx = content.indexOf(endMarker);
+            
+            if (startIdx === -1 || endIdx === -1) return null;
+            
+            try {
+                const jsonStr = content.substring(startIdx + startMarker.length, endIdx);
+                return JSON.parse(jsonStr);
+            } catch (e) {
+                console.error('解析路线数据失败:', e);
+                return null;
+            }
+        }
+
+        // 移除路线数据标记，返回清洁的内容
+        function cleanRouteData(content) {
+            return content.replace(/<!--ROUTE_DATA_START-->.*?<!--ROUTE_DATA_END-->/gs, '');
+        }
+
+        // 格式化 Markdown 图片
+        function formatMarkdownImages(text) {
+            // ![alt](url) -> <img>
+            return text.replace(/!\[([^\]]*)\]\(([^)]+)\)/g, '<img src="$2" alt="$1" style="max-width:100%;border-radius:8px;margin-top:8px;">');
+        }
+
+        // 渲染路线地图卡片
+        function renderRouteCard(container, routeData) {
+            mapCounter++;
+            const mapId = 'route-map-' + mapCounter;
+            
+            // 构建路线卡片HTML
+            const routeType = routeData.type || 'driving';
+            const modeConfig = {
+                driving: { icon: '🚗', name: '驾车', badgeClass: 'route-mode-driving' },
+                walking: { icon: '🚶', name: '步行', badgeClass: 'route-mode-walking' },
+                transit: { icon: '🚌', name: '公交', badgeClass: 'route-mode-transit' }
+            };
+            const mode = modeConfig[routeType] || modeConfig.driving;
+            
+            let cardHtml = `<div class="route-card">`;
+            cardHtml += `<div class="route-map-container" id="${mapId}"><div class="map-loading">🗺️ 地图加载中...</div></div>`;
+            cardHtml += `<div class="route-info-bar">`;
+            cardHtml += `<div class="route-info-item"><span class="icon">${mode.icon}</span><span>${mode.name}</span></div>`;
+            cardHtml += `<div class="route-info-item"><span class="icon">📍</span><span>${routeData.distance || ''}</span></div>`;
+            cardHtml += `<div class="route-info-item"><span class="icon">⏱️</span><span>${routeData.duration || ''}</span></div>`;
+            cardHtml += `</div>`;
+            
+            // 路线步骤
+            const steps = routeData.steps || [];
+            const segments = routeData.segments || [];
+            
+            if (steps.length > 0) {
+                cardHtml += `<div class="route-steps">`;
+                steps.forEach((step, i) => {
+                    cardHtml += `<div class="route-step-item">`;
+                    cardHtml += `<div class="route-step-num">${i + 1}</div>`;
+                    cardHtml += `<div class="route-step-text">${step.instruction || ''}</div>`;
+                    cardHtml += `<div class="route-step-meta">${step.distance || ''} ${step.duration || ''}</div>`;
+                    cardHtml += `</div>`;
+                });
+                cardHtml += `</div>`;
+            } else if (segments.length > 0) {
+                cardHtml += `<div class="route-steps">`;
+                segments.forEach((seg, i) => {
+                    const segIcon = seg.type === '公交' ? '🚌' : seg.type === '步行' ? '🚶' : '🚇';
+                    cardHtml += `<div class="route-step-item">`;
+                    cardHtml += `<div class="route-step-num">${i + 1}</div>`;
+                    cardHtml += `<div class="route-step-text">${segIcon} ${seg.instruction || ''}${seg.line ? ' (' + seg.line + ')' : ''}</div>`;
+                    cardHtml += `<div class="route-step-meta">${seg.distance || ''}</div>`;
+                    cardHtml += `</div>`;
+                });
+                cardHtml += `</div>`;
+            }
+            
+            cardHtml += `</div>`;
+            container.insertAdjacentHTML('beforeend', cardHtml);
+            
+            // 延迟初始化地图（等待DOM渲染）
+            setTimeout(() => initAMap(mapId, routeData), 100);
+        }
+
+        // 初始化高德地图并绘制路线
+        function initAMap(mapId, routeData) {
+            const mapContainer = document.getElementById(mapId);
+            if (!mapContainer || typeof AMap === 'undefined') {
+                if (mapContainer) mapContainer.innerHTML = '<div class="map-loading">🗺️ 地图加载失败，请刷新页面重试</div>';
+                return;
+            }
+            
+            try {
+                // 移除加载提示
+                mapContainer.innerHTML = '';
+                
+                const map = new AMap.Map(mapId, {
+                    zoom: 12,
+                    viewMode: '2D'
+                });
+                
+                // 绘制路线轨迹
+                if (routeData.path && routeData.path.length > 0) {
+                    const pathPoints = routeData.path.split(';').map(p => {
+                        const [lng, lat] = p.split(',').map(Number);
+                        return new AMap.LngLat(lng, lat);
+                    });
+                    
+                    const polyline = new AMap.Polyline({
+                        path: pathPoints,
+                        strokeColor: '#667eea',
+                        strokeWeight: 5,
+                        strokeOpacity: 0.8,
+                        lineJoin: 'round',
+                        lineCap: 'round'
+                    });
+                    map.add(polyline);
+                    
+                    // 添加起点和终点标记
+                    if (pathPoints.length >= 2) {
+                        const startMarker = new AMap.Marker({
+                            position: pathPoints[0],
+                            content: '<div style="background:#4CAF50;color:white;padding:4px 10px;border-radius:16px;font-size:12px;font-weight:bold;white-space:nowrap;box-shadow:0 2px 6px rgba(0,0,0,0.2);">🟢 起点</div>',
+                            offset: new AMap.Pixel(-30, -15)
+                        });
+                        
+                        const endMarker = new AMap.Marker({
+                            position: pathPoints[pathPoints.length - 1],
+                            content: '<div style="background:#f44336;color:white;padding:4px 10px;border-radius:16px;font-size:12px;font-weight:bold;white-space:nowrap;box-shadow:0 2px 6px rgba(0,0,0,0.2);">🔴 终点</div>',
+                            offset: new AMap.Pixel(-30, -15)
+                        });
+                        
+                        map.add(startMarker);
+                        map.add(endMarker);
+                        
+                        // 自动调整视野
+                        map.setFitView([polyline, startMarker, endMarker], false, [50, 50, 50, 50]);
+                    }
+                }
+                
+            } catch (e) {
+                console.error('地图初始化失败:', e);
+                mapContainer.innerHTML = '<div class="map-loading">🗺️ 地图渲染失败：' + e.message + '</div>';
+            }
+        }
+
+        // 添加消息到聊天区
+        function addMessage(content, isUser) {
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${isUser ? 'message-user' : 'message-bot'}`;
+            
+            const messageContent = document.createElement('div');
+            messageContent.className = 'message-content';
+            
+            if (isUser) {
+                // 用户消息直接显示
+                messageContent.innerHTML = content.replace(/\n/g, '<br>');
+            } else {
+                // AI消息：检测并解析路线数据
+                const routeData = parseRouteData(content);
+                
+                // 清洁内容（移除路线数据标记）
+                let cleanContent = cleanRouteData(content);
+                
+                // 格式化Markdown图片
+                cleanContent = formatMarkdownImages(cleanContent);
+                
+                // 将换行符转为HTML
+                cleanContent = cleanContent.replace(/\n/g, '<br>');
+                
+                // 简单Markdown加粗处理
+                cleanContent = cleanContent.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+                
+                // 渲染文本内容
+                messageContent.innerHTML = cleanContent;
+                
+                // 如果有路线数据，渲染地图卡片
+                if (routeData) {
+                    renderRouteCard(messageContent, routeData);
+                }
+            }
+            
+            messageDiv.appendChild(messageContent);
+            chatMessages.appendChild(messageDiv);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+
+        // 发送消息
+        async function sendMessage() {
+            const message = messageInput.value.trim();
+            if (!message) return;
+
+            // 如果没有当前会话，创建一个新会话
+            if (!currentSessionId) {
+                await createNewSession();
+            }
+
+            // 添加用户消息
+            addMessage(message, true);
+            messageInput.value = '';
+
+            try {
+                const response = await fetch('/agent/chat', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        userId: userId,
+                        sessionId: currentSessionId,
+                        message: message
+                    })
+                });
+
+                const result = await response.json();
+
+                if (result.code === 1) {
+                    // 直接传递原始内容，addMessage会处理格式化
+                    addMessage(result.data, false);
+                    
+                    // 如果是第一条消息，更新会话标题
+                    const messages = chatMessages.querySelectorAll('.message');
+                    if (messages.length === 2) {
+                        updateSessionTitle(message.substring(0, 20));
+                    }
+                } else {
+                    addMessage('❌ 错误：' + result.msg, false);
+                }
+            } catch (error) {
+                addMessage('❌ 网络错误：' + error.message, false);
+            } finally {
+                messageInput.focus();
+            }
+        }
+
+        // 更新会话标题
+        async function updateSessionTitle(title) {
+            if (!currentSessionId) return;
+            
+            try {
+                await fetch(`/agent/sessions/${currentSessionId}/title`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        userId: userId,
+                        sessionTitle: title
+                    })
+                });
+                
+                // 重新加载会话列表以显示新标题
+                loadSessionList();
+            } catch (error) {
+                console.error('更新会话标题失败:', error);
+            }
+        }
+
+        // 格式化时间
+        function formatTime(timeStr) {
+            if (!timeStr) return '';
+            
+            try {
+                const date = new Date(timeStr);
+                const now = new Date();
+                const diff = now - date;
+                
+                // 小于1分钟
+                if (diff < 60000) {
+                    return '刚刚';
+                }
+                // 小于1小时
+                if (diff < 3600000) {
+                    return Math.floor(diff / 60000) + '分钟前';
+                }
+                // 小于24小时
+                if (diff < 86400000) {
+                    return Math.floor(diff / 3600000) + '小时前';
+                }
+                // 小于7天
+                if (diff < 604800000) {
+                    return Math.floor(diff / 86400000) + '天前';
+                }
+                
+                // 超过7天，显示具体日期
+                const year = date.getFullYear();
+                const month = String(date.getMonth() + 1).padStart(2, '0');
+                const day = String(date.getDate()).padStart(2, '0');
+                const hours = String(date.getHours()).padStart(2, '0');
+                const minutes = String(date.getMinutes()).padStart(2, '0');
+                
+                return `${year}-${month}-${day} ${hours}:${minutes}`;
+            } catch (e) {
+                return timeStr;
+            }
+        }
+
+        // HTML转义
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        // 页面加载时检查token并初始化
+        window.addEventListener('DOMContentLoaded', () => {
+            // 检查是否有token，如果没有则跳转到登录页
+            const token = localStorage.getItem('token');
+            if (!token) {
+                window.location.href = '/login';
+                return;
+            }
+            
+            // 加载会话列表
+            loadSessionList();
+            
+            // 聚焦输入框
+            messageInput.focus();
+        });
+    </script>
+</body>
+</html>
