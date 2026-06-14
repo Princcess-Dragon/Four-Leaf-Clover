@@ -1,0 +1,1080 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>旅游规划 - 知途旅游助手</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Microsoft YaHei', Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+            position: relative;
+        }
+
+        .back-btn {
+            position: absolute;
+            left: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            padding: 10px 20px;
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            border: 2px solid rgba(255, 255, 255, 0.5);
+            border-radius: 8px;
+            text-decoration: none;
+            font-size: 14px;
+            transition: all 0.3s;
+        }
+
+        .back-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+            border-color: white;
+        }
+
+        .header h1 {
+            font-size: 32px;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            font-size: 16px;
+            opacity: 0.9;
+        }
+
+        .progress-bar {
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 10px;
+            height: 8px;
+            margin-top: 20px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: white;
+            border-radius: 10px;
+            transition: width 0.5s ease;
+            width: 0%;
+        }
+
+        .progress-text {
+            margin-top: 10px;
+            font-size: 14px;
+            opacity: 0.9;
+        }
+
+        .form-container {
+            padding: 40px;
+        }
+
+        .section {
+            margin-bottom: 35px;
+        }
+
+        .section-title {
+            font-size: 20px;
+            color: #333;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .section-title::before {
+            content: '';
+            width: 4px;
+            height: 24px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 2px;
+        }
+
+        .weather-options {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+        }
+
+        .option-card {
+            padding: 20px;
+            border: 2px solid #e0e0e0;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-align: center;
+        }
+
+        .option-card:hover {
+            border-color: #667eea;
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.2);
+        }
+
+        .option-card.selected {
+            border-color: #667eea;
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%);
+        }
+
+        .option-icon {
+            font-size: 36px;
+            margin-bottom: 10px;
+        }
+
+        .option-label {
+            font-size: 14px;
+            color: #333;
+            font-weight: 500;
+        }
+
+        .destination-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 15px;
+        }
+
+        .destination-card {
+            padding: 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .destination-card:hover {
+            border-color: #667eea;
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.2);
+        }
+
+        .destination-card.selected {
+            border-color: #667eea;
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%);
+        }
+
+        .destination-name {
+            font-size: 16px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 5px;
+        }
+
+        .destination-desc {
+            font-size: 12px;
+            color: #999;
+        }
+
+        .story-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 15px;
+        }
+
+        .story-card {
+            padding: 20px;
+            border: 2px solid #e0e0e0;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .story-card:hover {
+            border-color: #667eea;
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.2);
+        }
+
+        .story-card.selected {
+            border-color: #667eea;
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%);
+        }
+
+        .story-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 8px;
+        }
+
+        .story-preview {
+            font-size: 13px;
+            color: #666;
+            line-height: 1.5;
+        }
+
+        .budget-slider {
+            padding: 20px;
+            background: #f9f9f9;
+            border-radius: 12px;
+        }
+
+        .budget-display {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .budget-amount {
+            font-size: 36px;
+            font-weight: bold;
+            color: #667eea;
+        }
+
+        .budget-range {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 10px;
+            color: #999;
+            font-size: 14px;
+        }
+
+        input[type="range"] {
+            width: 100%;
+            height: 8px;
+            border-radius: 4px;
+            background: #e0e0e0;
+            outline: none;
+            -webkit-appearance: none;
+        }
+
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            cursor: pointer;
+            box-shadow: 0 2px 6px rgba(102, 126, 234, 0.4);
+        }
+
+        .transport-options {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 15px;
+        }
+
+        .transport-card {
+            padding: 20px;
+            border: 2px solid #e0e0e0;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .transport-card:hover {
+            border-color: #667eea;
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.2);
+        }
+
+        .transport-card.selected {
+            border-color: #667eea;
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%);
+        }
+
+        .transport-icon {
+            font-size: 32px;
+        }
+
+        .transport-info {
+            flex: 1;
+        }
+
+        .transport-name {
+            font-size: 16px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 3px;
+        }
+
+        .transport-desc {
+            font-size: 12px;
+            color: #999;
+        }
+
+        .submit-section {
+            text-align: center;
+            margin-top: 40px;
+            padding-top: 30px;
+            border-top: 2px solid #e0e0e0;
+        }
+
+        .btn-submit {
+            padding: 16px 60px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 18px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
+        }
+
+        .btn-submit:hover:not(:disabled) {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-submit:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .loading-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            z-index: 9999;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .loading-overlay.show {
+            display: flex;
+        }
+
+        .loading-box {
+            background: white;
+            padding: 40px;
+            border-radius: 20px;
+            text-align: center;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+        }
+
+        .spinner {
+            width: 60px;
+            height: 60px;
+            border: 5px solid #f3f3f3;
+            border-top: 5px solid #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .summary-box {
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.05) 0%, rgba(118, 75, 162, 0.05) 100%);
+            border: 2px solid #667eea;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 30px;
+            display: none;
+        }
+
+        .summary-box.show {
+            display: block;
+            animation: slideDown 0.3s ease;
+        }
+
+        @keyframes slideDown {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .summary-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: #667eea;
+            margin-bottom: 15px;
+        }
+
+        .summary-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 0;
+            border-bottom: 1px solid rgba(102, 126, 234, 0.1);
+        }
+
+        .summary-item:last-child {
+            border-bottom: none;
+        }
+
+        .summary-label {
+            font-weight: 500;
+            color: #666;
+        }
+
+        .summary-value {
+            color: #333;
+            font-weight: 600;
+        }
+
+        @media screen and (max-width: 768px) {
+            .container {
+                border-radius: 15px;
+            }
+
+            .header {
+                padding: 20px;
+                padding-top: 60px;
+            }
+
+            .back-btn {
+                left: 10px;
+                top: 15px;
+                transform: none;
+                padding: 8px 15px;
+                font-size: 13px;
+            }
+
+            .header h1 {
+                font-size: 24px;
+            }
+
+            .form-container {
+                padding: 20px;
+            }
+
+            .weather-options,
+            .transport-options {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .destination-grid,
+            .story-list {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media screen and (max-width: 480px) {
+            body {
+                padding: 10px;
+            }
+
+            .weather-options,
+            .transport-options {
+                grid-template-columns: 1fr;
+            }
+
+            .btn-submit {
+                width: 100%;
+                padding: 14px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <a href="/index" class="back-btn">← 返回对话</a>
+            <h1>🌍 定制你的完美旅程</h1>
+            <p>选择你的偏好，我们将为你打造专属旅行方案</p>
+            
+            <div class="progress-bar">
+                <div class="progress-fill" id="progressFill"></div>
+            </div>
+            <div class="progress-text" id="progressText">已完成 0/5 项选择</div>
+        </div>
+
+        <div class="form-container">
+            <!-- 出发地选择 -->
+            <div class="section">
+                <div class="section-title">🚀 出发地（可选）</div>
+                <div class="destination-grid">
+                    <div class="destination-card" data-type="origin" data-value="beijing">
+                        <div class="destination-name">北京</div>
+                        <div class="destination-desc">首都，交通枢纽</div>
+                    </div>
+                    <div class="destination-card" data-type="origin" data-value="shanghai">
+                        <div class="destination-name">上海</div>
+                        <div class="destination-desc">国际都市，浦东机场</div>
+                    </div>
+                    <div class="destination-card" data-type="origin" data-value="guangzhou">
+                        <div class="destination-name">广州</div>
+                        <div class="destination-desc">南方门户，白云机场</div>
+                    </div>
+                    <div class="destination-card" data-type="origin" data-value="shenzhen">
+                        <div class="destination-name">深圳</div>
+                        <div class="destination-desc">创新之城，宝安机场</div>
+                    </div>
+                    <div class="destination-card" data-type="origin" data-value="chengdu">
+                        <div class="destination-name">成都</div>
+                        <div class="destination-desc">天府之国，双流机场</div>
+                    </div>
+                    <div class="destination-card" data-type="origin" data-value="wuhan">
+                        <div class="destination-name">武汉</div>
+                        <div class="destination-desc">九省通衢，中部枢纽</div>
+                    </div>
+                    <div class="destination-card" data-type="origin" data-value="hangzhou">
+                        <div class="destination-name">杭州</div>
+                        <div class="destination-desc">人间天堂，萧山机场</div>
+                    </div>
+                    <div class="destination-card" data-type="origin" data-value="nanjing">
+                        <div class="destination-name">南京</div>
+                        <div class="destination-desc">六朝古都，禄口机场</div>
+                    </div>
+                    <div class="destination-card" data-type="origin" data-value="custom" onclick="showCustomInput('origin')">
+                        <div class="destination-name">✏️ 自定义</div>
+                        <div class="destination-desc">输入你的出发城市</div>
+                    </div>
+                </div>
+                <!-- 出发地自定义输入框 -->
+                <div id="customOriginInput" style="display: none; margin-top: 15px;">
+                    <input type="text" 
+                           placeholder="请输入你的出发城市，例如：长沙、重庆、青岛..."
+                           style="width: 100%; padding: 12px 15px; border: 2px solid #667eea; border-radius: 8px; font-size: 14px;"
+                           oninput="updateCustomSelection('origin', this.value)"
+                    />
+                </div>
+                <div style="margin-top: 8px; font-size: 12px; color: #999;">
+                    💡 填写出发地可以为你生成从出发地到目的地的详细路线规划（包含距离、时间、地图）
+                </div>
+            </div>
+
+            <div class="section">
+                <div class="section-title">天气偏好</div>
+                <div class="weather-options">
+                    <div class="option-card" data-type="weather" data-value="sunny">
+                        <div class="option-icon">☀️</div>
+                        <div class="option-label">晴天</div>
+                    </div>
+                    <div class="option-card" data-type="weather" data-value="cloudy">
+                        <div class="option-icon">⛅</div>
+                        <div class="option-label">多云</div>
+                    </div>
+                    <div class="option-card" data-type="weather" data-value="rainy">
+                        <div class="option-icon">🌧️</div>
+                        <div class="option-label">雨天</div>
+                    </div>
+                    <div class="option-card" data-type="weather" data-value="snowy">
+                        <div class="option-icon">❄️</div>
+                        <div class="option-label">雪天</div>
+                    </div>
+                    <div class="option-card" data-type="weather" data-value="any">
+                        <div class="option-icon">🌈</div>
+                        <div class="option-label">不限</div>
+                    </div>
+                    <div class="option-card" data-type="weather" data-value="custom" onclick="showCustomInput('weather')">
+                        <div class="option-icon">✏️</div>
+                        <div class="option-label">自定义</div>
+                    </div>
+                </div>
+                <!-- 天气自定义输入框 -->
+                <div id="customWeatherInput" style="display: none; margin-top: 15px;">
+                    <input type="text" 
+                           placeholder="请输入你想要的天气，例如：晴朗微风、小雨朦胧..."
+                           style="width: 100%; padding: 12px 15px; border: 2px solid #667eea; border-radius: 8px; font-size: 14px;"
+                           oninput="updateCustomSelection('weather', this.value)"
+                    />
+                </div>
+            </div>
+
+            <div class="section">
+                <div class="section-title">旅游目的地</div>
+                <div class="destination-grid">
+                    <div class="destination-card" data-type="destination" data-value="beijing">
+                        <div class="destination-name">北京</div>
+                        <div class="destination-desc">古都文化，历史遗迹</div>
+                    </div>
+                    <div class="destination-card" data-type="destination" data-value="shanghai">
+                        <div class="destination-name">上海</div>
+                        <div class="destination-desc">现代都市，繁华时尚</div>
+                    </div>
+                    <div class="destination-card" data-type="destination" data-value="hangzhou">
+                        <div class="destination-name">杭州</div>
+                        <div class="destination-desc">西湖美景，人间天堂</div>
+                    </div>
+                    <div class="destination-card" data-type="destination" data-value="chengdu">
+                        <div class="destination-name">成都</div>
+                        <div class="destination-desc">熊猫故乡，美食之都</div>
+                    </div>
+                    <div class="destination-card" data-type="destination" data-value="xian">
+                        <div class="destination-name">西安</div>
+                        <div class="destination-desc">千年古都，兵马俑</div>
+                    </div>
+                    <div class="destination-card" data-type="destination" data-value="guilin">
+                        <div class="destination-name">桂林</div>
+                        <div class="destination-desc">山水甲天下</div>
+                    </div>
+                    <div class="destination-card" data-type="destination" data-value="yunnan">
+                        <div class="destination-name">云南</div>
+                        <div class="destination-desc">彩云之南，风情万种</div>
+                    </div>
+                    <div class="destination-card" data-type="destination" data-value="tibet">
+                        <div class="destination-name">西藏</div>
+                        <div class="destination-desc">雪域高原，神秘圣地</div>
+                    </div>
+                    <div class="destination-card" data-type="destination" data-value="custom" onclick="showCustomInput('destination')">
+                        <div class="destination-name">✏️ 自定义</div>
+                        <div class="destination-desc">输入你想去的任何地方</div>
+                    </div>
+                </div>
+                <!-- 目的地自定义输入框 -->
+                <div id="customDestinationInput" style="display: none; margin-top: 15px;">
+                    <input type="text" 
+                           placeholder="请输入你想去的目的地，例如：厦门、青岛、张家界..."
+                           style="width: 100%; padding: 12px 15px; border: 2px solid #667eea; border-radius: 8px; font-size: 14px;"
+                           oninput="updateCustomSelection('destination', this.value)"
+                    />
+                </div>
+            </div>
+
+            <div class="section">
+                <div class="section-title">典故与经典故事</div>
+                <div class="story-list">
+                    <div class="story-card" data-type="story" data-value="history">
+                        <div class="story-title">📜 历史典故</div>
+                        <div class="story-preview">探索古代历史事件和名人故事，感受历史的厚重</div>
+                    </div>
+                    <div class="story-card" data-type="story" data-value="mythology">
+                        <div class="story-title">🐉 神话传说</div>
+                        <div class="story-preview">了解中国古老的神话故事和民间传说</div>
+                    </div>
+                    <div class="story-card" data-type="story" data-value="literature">
+                        <div class="story-title">📚 文学名著</div>
+                        <div class="story-preview">追寻古典文学作品中的场景和故事背景</div>
+                    </div>
+                    <div class="story-card" data-type="story" data-value="folklore">
+                        <div class="story-title">🎭 民俗风情</div>
+                        <div class="story-preview">体验各地独特的民俗文化和传统习俗</div>
+                    </div>
+                    <div class="story-card" data-type="story" data-value="revolutionary">
+                        <div class="story-title">⭐ 红色经典</div>
+                        <div class="story-preview">回顾革命历史，传承红色基因</div>
+                    </div>
+                    <div class="story-card" data-type="story" data-value="none">
+                        <div class="story-title">❌ 不需要</div>
+                        <div class="story-preview">专注于自然风光和现代体验</div>
+                    </div>
+                    <div class="story-card" data-type="story" data-value="custom" onclick="showCustomInput('story')">
+                        <div class="story-title">✏️ 自定义</div>
+                        <div class="story-preview">输入你感兴趣的特定故事或主题</div>
+                    </div>
+                </div>
+                <!-- 故事自定义输入框 -->
+                <div id="customStoryInput" style="display: none; margin-top: 15px;">
+                    <input type="text" 
+                           placeholder="例如：三国演义故事、唐诗宋词、丝绸之路历史..."
+                           style="width: 100%; padding: 12px 15px; border: 2px solid #667eea; border-radius: 8px; font-size: 14px;"
+                           oninput="updateCustomSelection('story', this.value)"
+                    />
+                </div>
+            </div>
+
+            <div class="section">
+                <div class="section-title">预算范围（元/人）</div>
+                <div class="budget-slider">
+                    <div class="budget-display">
+                        <div class="budget-amount" id="budgetAmount">¥5000</div>
+                        <div class="budget-range">
+                            <span>¥1000</span>
+                            <span>¥50000+</span>
+                        </div>
+                    </div>
+                    <input type="range" id="budgetRange" min="1000" max="50000" step="500" value="5000">
+                </div>
+            </div>
+
+            <div class="section">
+                <div class="section-title">交通方式</div>
+                <div class="transport-options">
+                    <div class="transport-card" data-type="transport" data-value="plane">
+                        <div class="transport-icon">✈️</div>
+                        <div class="transport-info">
+                            <div class="transport-name">飞机</div>
+                            <div class="transport-desc">快速便捷，适合长途</div>
+                        </div>
+                    </div>
+                    <div class="transport-card" data-type="transport" data-value="train">
+                        <div class="transport-icon">🚄</div>
+                        <div class="transport-info">
+                            <div class="transport-name">高铁/火车</div>
+                            <div class="transport-desc">舒适经济，风景优美</div>
+                        </div>
+                    </div>
+                    <div class="transport-card" data-type="transport" data-value="bus">
+                        <div class="transport-icon">🚌</div>
+                        <div class="transport-info">
+                            <div class="transport-name">汽车</div>
+                            <div class="transport-desc">灵活方便，短途首选</div>
+                        </div>
+                    </div>
+                    <div class="transport-card" data-type="transport" data-value="self-drive">
+                        <div class="transport-icon">🚗</div>
+                        <div class="transport-info">
+                            <div class="transport-name">自驾</div>
+                            <div class="transport-desc">自由度高，深度探索</div>
+                        </div>
+                    </div>
+                    <div class="transport-card" data-type="transport" data-value="mixed">
+                        <div class="transport-icon">🔄</div>
+                        <div class="transport-info">
+                            <div class="transport-name">混合交通</div>
+                            <div class="transport-desc">多种方式组合，最优方案</div>
+                        </div>
+                    </div>
+                    <div class="transport-card" data-type="transport" data-value="custom" onclick="showCustomInput('transport')">
+                        <div class="transport-icon">✏️</div>
+                        <div class="transport-info">
+                            <div class="transport-name">自定义</div>
+                            <div class="transport-desc">输入你偏好的交通方式</div>
+                        </div>
+                    </div>
+                </div>
+                <!-- 交通自定义输入框 -->
+                <div id="customTransportInput" style="display: none; margin-top: 15px;">
+                    <input type="text" 
+                           placeholder="例如：骑行、徒步、轮船、直升机..."
+                           style="width: 100%; padding: 12px 15px; border: 2px solid #667eea; border-radius: 8px; font-size: 14px;"
+                           oninput="updateCustomSelection('transport', this.value)"
+                    />
+                </div>
+            </div>
+
+            <!-- 自定义需求 -->
+            <div class="section">
+                <div class="section-title">💭 特殊需求或备注（可选）</div>
+                <textarea 
+                    id="customNotes" 
+                    placeholder="例如：&#10;- 我想带父母一起旅行，需要无障碍设施&#10;- 对海鲜过敏，请推荐其他美食&#10;- 希望行程轻松一些，不要太累&#10;- 想体验当地特色民宿&#10;- 其他特殊要求..."
+                    rows="5"
+                    style="width: 100%; padding: 15px; border: 2px solid #e0e0e0; border-radius: 12px; font-size: 14px; font-family: inherit; resize: vertical; transition: all 0.3s;"
+                    onfocus="this.style.borderColor='#667eea'; this.style.boxShadow='0 0 0 3px rgba(102, 126, 234, 0.1)'"
+                    onblur="this.style.borderColor='#e0e0e0'; this.style.boxShadow='none'"
+                    oninput="updateCustomNotes(this.value)"
+                ></textarea>
+                <div style="margin-top: 8px; font-size: 12px; color: #999;">
+                    💡 提示：填写特殊需求可以让AI为你生成更个性化的旅行方案
+                </div>
+            </div>
+
+            <div class="submit-section">
+                <div class="summary-box" id="summaryBox">
+                    <div class="summary-title">📋 你的旅行偏好</div>
+                    <div id="summaryContent"></div>
+                </div>
+                
+                <button class="btn-submit" id="submitBtn" onclick="submitPlan()" disabled>请先完成所有选择</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="loading-overlay" id="loadingOverlay">
+        <div class="loading-box">
+            <div class="spinner"></div>
+            <div style="font-size: 16px; color: #333; margin-bottom: 10px;">正在生成你的专属旅行方案...</div>
+            <div style="font-size: 14px; color: #999;">AI助手正在为你精心规划，请稍候</div>
+        </div>
+    </div>
+
+    <script>
+        const selections = {
+            origin: null, // 出发地（可选）
+            weather: null,
+            destination: null,
+            story: null,
+            budget: 5000,
+            transport: null,
+            customNotes: '' // 自定义备注
+        };
+
+        const optionMaps = {
+            origin: { beijing: '北京', shanghai: '上海', guangzhou: '广州', shenzhen: '深圳', chengdu: '成都', wuhan: '武汉', hangzhou: '杭州', nanjing: '南京' },
+            weather: { sunny: '晴天', cloudy: '多云', rainy: '雨天', snowy: '雪天', any: '不限' },
+            destination: { beijing: '北京', shanghai: '上海', hangzhou: '杭州', chengdu: '成都', xian: '西安', guilin: '桂林', yunnan: '云南', tibet: '西藏' },
+            story: { history: '历史典故', mythology: '神话传说', literature: '文学名著', folklore: '民俗风情', revolutionary: '红色经典', none: '不需要' },
+            transport: { plane: '飞机', train: '高铁/火车', bus: '汽车', 'self-drive': '自驾', mixed: '混合交通' }
+        };
+
+        document.querySelectorAll('.option-card, .destination-card, .story-card, .transport-card').forEach(card => {
+            card.addEventListener('click', function() {
+                const type = this.dataset.type;
+                const value = this.dataset.value;
+
+                document.querySelectorAll(`[data-type="${type}"]`).forEach(c => {
+                    c.classList.remove('selected');
+                });
+
+                this.classList.add('selected');
+                selections[type] = value;
+                
+                updateProgress();
+                updateSummary();
+            });
+        });
+
+        const budgetRange = document.getElementById('budgetRange');
+        const budgetAmount = document.getElementById('budgetAmount');
+
+        budgetRange.addEventListener('input', function() {
+            const value = parseInt(this.value);
+            selections.budget = value;
+            
+            if (value >= 50000) {
+                budgetAmount.textContent = '¥50000+';
+            } else {
+                budgetAmount.textContent = `¥${value}`;
+            }
+            
+            updateProgress();
+            updateSummary();
+        });
+
+        function updateProgress() {
+            let completed = 0;
+            if (selections.weather) completed++;
+            if (selections.destination) completed++;
+            if (selections.story) completed++;
+            if (selections.transport) completed++;
+            
+            const percentage = (completed / 5) * 100;
+            document.getElementById('progressFill').style.width = percentage + '%';
+            document.getElementById('progressText').textContent = `已完成 ${completed}/5 项选择`;
+            
+            updateSubmitButton();
+        }
+
+        function updateSubmitButton() {
+            const submitBtn = document.getElementById('submitBtn');
+            const isComplete = selections.weather && selections.destination && 
+                              selections.story && selections.transport;
+            
+            if (isComplete) {
+                submitBtn.disabled = false;
+                submitBtn.textContent = '✨ 生成旅行方案';
+            } else {
+                submitBtn.disabled = true;
+                const remaining = [];
+                if (!selections.weather) remaining.push('天气');
+                if (!selections.destination) remaining.push('目的地');
+                if (!selections.story) remaining.push('典故故事');
+                if (!selections.transport) remaining.push('交通方式');
+                submitBtn.textContent = `请选择: ${remaining.join('、')}`;
+            }
+        }
+
+        function updateSummary() {
+            const summaryBox = document.getElementById('summaryBox');
+            const summaryContent = document.getElementById('summaryContent');
+            
+            let html = '';
+            
+            if (selections.origin) {
+                const originText = optionMaps.origin[selections.origin] || selections.origin;
+                html += `<div class="summary-item"><span class="summary-label">🚀 出发地</span><span class="summary-value">${originText}</span></div>`;
+            }
+            
+            if (selections.weather) {
+                const weatherText = optionMaps.weather[selections.weather] || selections.weather;
+                html += `<div class="summary-item"><span class="summary-label">🌤️ 天气偏好</span><span class="summary-value">${weatherText}</span></div>`;
+            }
+            
+            if (selections.destination) {
+                const destText = optionMaps.destination[selections.destination] || selections.destination;
+                html += `<div class="summary-item"><span class="summary-label">📍 旅游目的地</span><span class="summary-value">${destText}</span></div>`;
+            }
+            
+            if (selections.story) {
+                const storyText = optionMaps.story[selections.story] || selections.story;
+                html += `<div class="summary-item"><span class="summary-label">📚 典故故事</span><span class="summary-value">${storyText}</span></div>`;
+            }
+            
+            html += `<div class="summary-item"><span class="summary-label">💰 预算范围</span><span class="summary-value">${budgetAmount.textContent}/人</span></div>`;
+            
+            if (selections.transport) {
+                const transportText = optionMaps.transport[selections.transport] || selections.transport;
+                html += `<div class="summary-item"><span class="summary-label">🚗 交通方式</span><span class="summary-value">${transportText}</span></div>`;
+            }
+            
+            if (selections.customNotes && selections.customNotes.trim()) {
+                const notesPreview = selections.customNotes.trim().length > 50 
+                    ? selections.customNotes.trim().substring(0, 50) + '...' 
+                    : selections.customNotes.trim();
+                html += `<div class="summary-item"><span class="summary-label">💭 特殊需求</span><span class="summary-value">${notesPreview}</span></div>`;
+            }
+            
+            if (html) {
+                summaryContent.innerHTML = html;
+                summaryBox.classList.add('show');
+            } else {
+                summaryBox.classList.remove('show');
+            }
+        }
+
+        // 更新自定义备注
+        function updateCustomNotes(value) {
+            selections.customNotes = value;
+            updateSummary();
+        }
+
+        // 显示自定义输入框
+        function showCustomInput(type) {
+            // 隐藏所有自定义输入框
+            document.querySelectorAll('[id^="custom"][id$="Input"]').forEach(el => {
+                el.style.display = 'none';
+            });
+            
+            // 显示对应的输入框
+            const inputId = `custom${type.charAt(0).toUpperCase() + type.slice(1)}Input`;
+            const inputElement = document.getElementById(inputId);
+            if (inputElement) {
+                inputElement.style.display = 'block';
+                inputElement.querySelector('input').focus();
+            }
+            
+            // 选中自定义卡片
+            document.querySelectorAll(`[data-type="${type}"]`).forEach(c => {
+                c.classList.remove('selected');
+            });
+            document.querySelector(`[data-type="${type}"][data-value="custom"]`).classList.add('selected');
+        }
+
+        // 更新自定义选择
+        function updateCustomSelection(type, value) {
+            if (value && value.trim()) {
+                selections[type] = value.trim();
+                updateProgress();
+                updateSummary();
+            } else {
+                selections[type] = null;
+                updateProgress();
+                updateSummary();
+            }
+        }
+
+        async function submitPlan() {
+            if (!selections.weather || !selections.destination || !selections.story || !selections.transport) {
+                alert('请完成所有选择');
+                return;
+            }
+
+            const weatherText = optionMaps.weather[selections.weather] || selections.weather;
+            const destinationText = optionMaps.destination[selections.destination] || selections.destination;
+            const storyText = optionMaps.story[selections.story] || selections.story;
+            const transportText = optionMaps.transport[selections.transport] || selections.transport;
+            const originText = selections.origin ? (optionMaps.origin[selections.origin] || selections.origin) : '';
+
+            // 构建路线规划请求（包含出发地）
+            const routeRequest = originText
+                ? `**重要：请在回复中包含从${originText}到${destinationText}的路线规划**（提供驾车、步行、公交等多种方式的具体路线信息，包括距离、时间、路线步骤等，务必使用“从${originText}到${destinationText}”的格式）`
+                : `**重要：请在回复中包含从出发地到${destinationText}的路线规划**（如果可能，提供具体的路线信息，如距离、时间等）`;
+
+            const message = `我想制定一个旅行计划：
+- 出发地：${originText || '未指定'}
+- 目的地：${destinationText}
+- 天气偏好：${weatherText}
+- 典故故事：${storyText}
+- 预算：¥${selections.budget}/人
+- 交通方式：${transportText}${selections.customNotes && selections.customNotes.trim() ? '\n- 特殊需求：' + selections.customNotes.trim() : ''}
+
+请为我详细规划行程，包括：
+1. 推荐的景点和游玩路线
+2. 当地特色美食推荐
+3. 住宿建议
+4. 详细的费用预算分配
+5. 注意事项和旅行贴士
+6. ${routeRequest}${selections.customNotes && selections.customNotes.trim() ? '\n7. 请特别关注我的特殊需求并给出相应建议' : ''}`;
+
+            document.getElementById('loadingOverlay').classList.add('show');
+
+            try {
+                let userId = localStorage.getItem('userId');
+                if (!userId) {
+                    window.location.href = '/login';
+                    return;
+                }
+
+                const sessionResponse = await fetch('/agent/sessions', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        userId: userId,
+                        sessionTitle: `${originText ? originText + '→' : ''}${destinationText}旅行计划`
+                    })
+                });
+
+                const sessionResult = await sessionResponse.json();
+
+                if (sessionResult.code === 1) {
+                    const sessionId = sessionResult.data;
+
+                    const chatResponse = await fetch('/agent/chat', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            userId: userId,
+                            sessionId: sessionId,
+                            message: message
+                        })
+                    });
+
+                    const chatResult = await chatResponse.json();
+
+                    if (chatResult.code === 1) {
+                        // 保存sessionId到localStorage，用于index页面自动切换
+                        localStorage.setItem('targetSessionId', sessionId);
+                        
+                        const loadingBox = document.querySelector('.loading-box');
+                        loadingBox.innerHTML = `
+                            <div style="font-size: 60px; margin-bottom: 20px;">✅</div>
+                            <div style="font-size: 16px; color: #4CAF50; font-weight: 600; margin-bottom: 10px;">方案生成成功！</div>
+                            <div style="font-size: 14px; color: #999;">正在跳转到对话页面...</div>
+                        `;
+                        
+                        setTimeout(() => {
+                            window.location.href = '/index';
+                        }, 1500);
+                    } else {
+                        document.getElementById('loadingOverlay').classList.remove('show');
+                        alert('生成方案失败：' + chatResult.msg);
+                    }
+                } else {
+                    document.getElementById('loadingOverlay').classList.remove('show');
+                    alert('创建会话失败：' + sessionResult.msg);
+                }
+            } catch (error) {
+                document.getElementById('loadingOverlay').classList.remove('show');
+                console.error('提交失败:', error);
+                alert('网络错误，请稍后重试：' + error.message);
+            }
+        }
+
+        window.addEventListener('DOMContentLoaded', () => {
+            const token = localStorage.getItem('token');
+            if (!token) {
+                sessionStorage.setItem('loginRedirectCount', '0');
+                window.location.href = '/login';
+                return;
+            }
+            
+            updateProgress();
+            updateSummary();
+        });
+    </script>
+</body>
+</html>
