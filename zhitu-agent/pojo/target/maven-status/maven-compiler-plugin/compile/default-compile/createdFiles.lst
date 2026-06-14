@@ -1,0 +1,5 @@
+com\clover\result\PageResult.class
+com\clover\entity\User.class
+com\clover\vo\CaptchaVO.class
+com\clover\result\Result.class
+com\clover\entity\Conversation.class
